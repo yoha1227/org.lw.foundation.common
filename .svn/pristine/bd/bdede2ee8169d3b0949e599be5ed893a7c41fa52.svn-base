@@ -1,0 +1,68 @@
+define(
+		"affair_mngt/embedded_widgets/CustomerInfoViewer",
+		[ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			// import modules will be inherited by our widget:
+			"dojox3rd/widget_template/SimpleEntityReadOnlyViewer",
+			"dojox3rd/widget/OrganizationTree",
+			"dijit/form/Button",
+			"dijit/Dialog",
+			"dojo/text!./templates/CustomerInfoViewer.html",
+			// import modules used by our widget:
+			"dijit/registry"
+		],
+		function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, SimpleEntityReadOnlyViewer, 
+			OrganizationTree, Button, Dialog, templateStr, registry ) {
+	    	
+			var treeDialog = new Dialog({
+				title:"请选择客户",
+				content: "<div data-dojo-type='dojox3rd/widget/OrganizationTree'></div>",
+				width: 400,
+				height: 500
+			})
+			
+			return dojo.declare("affair_mngt.embedded_widgets.CustomerInfoViewer",
+					[ _WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin,
+							// the modules will be inherited by our widget:
+							dojox3rd.widget_template.SimpleEntityReadOnlyViewer
+							], {
+						// Path to the template
+						templateString : templateStr,
+						
+				        // Override this method to perform custom behavior during dijit construction.
+						// Common operations for constructor:
+						// 1) Initialize non-primitive types (i.e. objects and arrays)
+						// 2) Add additional properties needed by succeeding lifecycle methods
+						constructor : function() {
+							
+						},
+
+						// When this method is called, all variables inherited from superclasses are 'mixed in'.
+						// Common operations for postMixInProperties
+						// 1) Modify or assign values for widget property variables defined in the template HTML file
+						postMixInProperties : function() {
+							this.inherited(arguments);
+						},
+
+						// postCreate() is called after buildRendering().  This is useful to override when 
+						// you need to access and/or manipulate DOM nodes included with your widget.
+						// DOM nodes and widgets with the dojoAttachPoint attribute specified can now be directly
+						// accessed as fields on "this". 
+						// Common operations for postCreate
+						// 1) Access and manipulate DOM nodes created in buildRendering()
+						// 2) Add new DOM nodes or widgets 
+						postCreate : function() {
+							this.inherited(arguments);
+//							this.ButtonNode.on("click", function(){
+//                                treeDialog.show();
+//                            })
+						},
+						
+						startup: function(){
+							this.inherited(arguments);
+						}
+						
+					});
+		});

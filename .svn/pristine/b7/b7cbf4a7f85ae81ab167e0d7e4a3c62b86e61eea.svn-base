@@ -1,0 +1,210 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.hy</groupId>
+	<artifactId>expense.WebUI</artifactId>
+	<version>0.0.1</version>
+	<packaging>war</packaging>
+	<name>expense.WebUI</name>
+	
+	<properties>
+		<copyright.year>2006-2008</copyright.year>
+		<webapp.name>Expense</webapp.name>
+		<webapp.postfix></webapp.postfix>
+
+		<htmlunit.version>2.6</htmlunit.version>
+		<selenium.version>2.28.0</selenium.version>
+		<dojo.version>1.8.1</dojo.version>
+
+		<sitemesh.version>2.4.2</sitemesh.version>
+
+		<spring.version>3.0.6.RELEASE</spring.version>
+
+		<softarch.version>1.0</softarch.version>
+
+		<test-webapp.name>web-test</test-webapp.name>
+
+		<!-- multi properties -->
+		<auto-gen.phase>process-test-classes</auto-gen.phase>
+	</properties>
+	<build>
+
+		<finalName>${webapp.name}</finalName>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/assembly</directory>
+			</resource>
+		</resources>
+		<!-- source paths for testing -->
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+			<testResource>
+				<directory>src/test/assembly</directory>
+			</testResource>
+		</testResources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp${webapp.postfix}</directory>
+						</resource>
+						<!-- sometimes, define assembly configurations under the web-inf in 
+							assembly dir -->
+						<resource>
+							<directory>src/main/assembly</directory>
+							<includes>
+								<include>**/WEB-INF/**</include>
+							</includes>
+						</resource>
+					</webResources>
+					<webXml>src/main/webapp${webapp.postfix}/WEB-INF/web.xml</webXml>
+					<warName>${webapp.name}</warName>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
+
+	<dependencies>
+
+		<!-- === Browser accessing dependencies === -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<!-- ++++ dependencies for server side page (html/jsp) decoration framework 
+			++++ -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.sitemesh</groupId> -->
+		<!-- <artifactId>sitemesh</artifactId> -->
+		<!-- <version>${sitemesh.version}</version> -->
+		<!-- </dependency> -->
+		<dependency>
+			<groupId>opensymphony</groupId>
+			<artifactId>sitemesh</artifactId>
+			<version>${sitemesh.version}</version>
+		</dependency>
+
+		<!-- ++++ dependencies for native browser accessing drivers ++++ -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>${selenium.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-firefox-driver</artifactId>
+			<version>${selenium.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.opera</groupId>
+			<artifactId>operadriver</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.7</version>
+		</dependency>
+
+		<!-- ++++ dependencies for jndi server-embedded ++++ -->
+
+		<!-- ==== dependencies for logging ==== -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.2</version>
+		</dependency>
+
+		<!-- ==== project dependencies ==== -->
+
+		<!-- ============================================================== -->
+
+		<!-- ==== dependencies for logging ==== -->
+
+		<!-- ==== dependencies for unit test ==== -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.test</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- ==== dependencies for web integration (cactus) test ==== -->
+
+		<!-- ============================================================== -->
+
+		<!-- ==== internal dependencies ==== -->
+
+		<dependency>
+			<groupId>com.softarch.asset.template</groupId>
+			<artifactId>testEnvironment.webserver</artifactId>
+			<version>${softarch.version}</version>
+			<scope>test</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.softarch.asset.template</groupId>
+			<artifactId>testEnvironment.db</artifactId>
+			<version>${softarch.version}</version>
+			<scope>test</scope>
+			<optional>true</optional>
+		</dependency>
+
+	</dependencies>
+
+	<repositories>
+		
+		<repository>
+			<id>Central</id>
+			<name>EP Maven Center</name>
+			<url>http://192.168.0.122:8081/nexus/content/repositories/central/</url>
+		</repository>
+		<repository>
+			<id>Maven Repository Center</id>
+			<name>Maven Repository Center</name>
+			<url>http://search.maven.org/</url>
+		</repository>
+		<!-- RESTEasy -->
+		
+		<repository>
+			<id>JBoss's Maven Repository</id>
+			<name>JBoss Nexus Repository</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>codehaus.org</id>
+			<name>Codehaus Snapshot Repository</name>
+			<url>http://snapshots.repository.codehaus.org</url>
+		</repository>
+	</repositories>
+</project>

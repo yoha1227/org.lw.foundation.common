@@ -1,0 +1,251 @@
+/*
+ * 基于tabContainer的流程引导图
+ * zengwz@suntang.com
+ */
+define([
+        "dijit/layout/TabContainer", 
+        "dojo/on",
+        "dojo/dom-style",
+        "dojo/mouse",
+        "dojo/query",
+        "dojo/topic",
+        "dojo/_base/array",
+        "dojo/_base/lang",
+        "dojo/_base/declare"
+    ], 
+    function (TabContainer, on, domStyle, mouse, query, topic, array, lang, declare){
+    /**
+     * 本类只为tab各title进行样式定义及事件绑定
+     * 在选中某tab时发布一个命名为 本类实例后的id值+"-selectItem" 消息
+     */
+    return declare("dojox3rd.widget_template.NavigableTabContainerBase", TabContainer, {
+        //自定义的started属性，在started完成之后设置为true
+        _customerStarted : false,
+      /**
+        * 用于控制跳转的图标
+        * @param {Object} {icon:[], title:"", position:"last"}
+        * icon最多有两个值，分别对应未访问之前、鼠标移入四个状态，默认为第一个状态的图片
+        * position默认为last,其他值为first，但目前尚未实现此功能
+        */
+       controllerTitle : {},
+       //控制切换的标签索引
+       _controllerTabIndex : -1, 
+       
+        _watchDomCreate : function(){
+            var num = 100;
+            var self = this;
+            var clock = setInterval(function(){
+                if (self.id) {
+                    var domSelector = "#" + self.id + " div:first-child";
+                    var linkDom = query(domSelector);
+                    if (linkDom.length > 0) {
+                        clearInterval(clock);
+                        self._onDomCreate(self.domNode);
+                    }
+                    else 
+                        if (num == 0) {
+                            clearInterval(clock);
+                        }
+                    num--;
+                }
+            }, 200);
+        },
+        
+        /**
+         * widget startup并创建完dom触发的事件
+         */
+        _onDomCreate : function(domNode){
+            this.onDomCreate.apply(this, arguments);
+        },
+        
+        onDomCreate : function(domNode){
+            
+        },
+        /**
+         * 根据domNode显示对应的tab
+         * @param {Object} domNode
+         */
+        selectItem : function(domNode){
+            this.onSelectItem(domNode);
+        },
+        /**
+         * 选中某tab后触发的事件
+         * @param {Object} domNode
+         * @param {Object} e
+         */
+        onSelectItem : function(domNode, e){
+        	
+        },
+        /**
+         * 根据store中item的父id获取对应的title dom对象
+         * @param {Object} parentId
+         */
+        getTitleDomByParentId : function(parentId){
+            
+        },
+        /**
+         * 根据store中item的父id获取对应的contenPane dom对象
+         * @param {Object} parentId
+         */
+        getContentDomByParentId : function(parentId){
+            
+        },
+        
+        startup : function(){
+            if (this["icons"] && !this._customerStarted) {
+                //设置标签container默认的class
+                if (this.get("class").indexOf("navigableTabContainer") == -1) {
+                    var newTabClass = "navigableTabContainer " + this.get("class");
+                    this.set({
+                        "class": newTabClass
+                    });
+                }
+                //设置ContentPane的属性{showTitle: false, iconClass:"自定义class"}
+                var tdtChild = this.getChildren();
+                var self = this;
+                array.forEach(tdtChild, function(node, index){
+                    var titlePro = {
+                        showTitle: false
+                    };
+                    if (lang.trim(node.get("title")) == "") {
+                        titlePro.title = "第" + (index + 1) + "个标签";
+                    }
+                    node.set(titlePro);
+                });
+                //先startup，为后续操作作准备
+                this.inherited(arguments);
+                
+                var imgArr = this["icons"];
+                var tabObj = this.domNode;
+                var tabTitle = query(".nowrapTabStrip .dijitTab", tabObj);
+                var zIndex = 99999;
+                var curSelectIndex = null; //当前正在浏览的索引
+                var selectedIndex = []; //已经点击过的标签索引
+                var leftOffset = 37; //定位时的偏移量
+                var curZIndex = 0; //定义当前元素的z-index值
+                //标签图片背景样式
+                var iconStyle = function(imgUrl){
+                    return {
+                        backgroundImage: "url(" + imgUrl + ")"
+                    };
+                }
+                //设置标签的样式
+                var setStyle = function(node, style){
+                    query("img.dijitIcon", node).style(style);
+                }
+                //根据是否已经浏览过获取相应的图片URL
+                var getImgUrl = function(index){
+                    if (array.indexOf(selectedIndex, index) != -1) {
+                        return imgArr[1][index];
+                    }
+                    else 
+                        return imgArr[0][index];
+                }
+                //计算并设置标签的定位
+                var setPosition = function(node, index){
+                    var lf = index * leftOffset * -1;
+                    //最后一个特殊处理
+                    if (index == childNum - 1) {
+                        lf += 17;
+                    }
+                    else 
+                        if (index != 0 && index == curSelectIndex) {
+                            lf += 16;
+                        }
+                    
+                    lf += "px";
+                    var positionStyle = {
+                        left: lf,
+                        position: "relative",
+                        zIndex: zIndex - index
+                    };
+                    domStyle.set(node, positionStyle);
+                }
+                
+                var childNum = tabTitle.length;
+                tabTitle.forEach(function(node, index){
+                    //定位
+                    setPosition(node, index);
+                    //首尾的边框
+                    /*if (index == 0){
+                     query(".dijitTabContent", node).style({borderLeftWidth: "1px"});
+                     }else if(index == childNum-1){
+                     query(".dijitTabContent", node).style({borderRightWidth: "1px"});
+                     }*/
+                    //初始化标签的同时初始化一些变量
+                    if (tdtChild[index].selected) {
+                        curSelectIndex = index;
+                        selectedIndex.push(index);
+                        setStyle(node, iconStyle(imgArr[2][index]));
+                        query("img.dijitIcon", node).addClass("realy");
+                    }
+                    else {
+                        query("img.dijitIcon", node).addClass("realy");
+                        setStyle(node, iconStyle(getImgUrl(index)));
+                    }
+                    
+                    on(node, "click", function(e){
+                        var canPublish = false;
+                        
+                        if(index == self._controllerTabIndex){
+                            self.selectChild(tdtChild[curSelectIndex]);
+                            canPublish = true;
+                        }else if (index != curSelectIndex) {
+                            curSelectIndex = index;
+                            
+                            tabTitle.forEach(function(snode, sindex){
+                                setPosition(snode, sindex);
+                                setStyle(snode, iconStyle(getImgUrl(sindex)));
+                            })
+                            
+                            var oldZIndex = zIndex + 1;
+                            domStyle.set(node, {
+                                zIndex: oldZIndex
+                            });
+                            setStyle(node, iconStyle(imgArr[2][index]));
+                            
+                            if (array.indexOf(selectedIndex, index) == -1) 
+                                selectedIndex.push(index);
+                            
+                            canPublish = true;
+                        }
+                        if (canPublish) {
+                            self.onSelectItem(tdtChild[index].domNode, e);
+                            topic.publish(self.get("id")+"-selectItem", tdtChild[index].domNode, e);
+                        }
+                    });
+                    
+                    //鼠标移入
+                    on(node, mouse.enter, function(e){
+                        if (index != curSelectIndex) {
+                            setStyle(node, iconStyle(imgArr[3][index]));
+                        }
+                    });
+//                    node.onmouseover = function(){
+//                        if (index != curSelectIndex) {
+//                            setStyle(node, iconStyle(imgArr[3][index]));
+//                        }
+//                    }
+                    //鼠标移开
+                    on(node, mouse.leave, function(e){
+                        if (index != curSelectIndex) {
+                            setStyle(node, iconStyle(getImgUrl(index)));
+                        }
+                    });
+//                    node.onmouseout = function(){
+//                        if (index != curSelectIndex) {
+//                            setStyle(node, iconStyle(getImgUrl(index)));
+//                        }
+//                    }
+                });
+                this.resize();
+                query("#"+this.id+"_tablist", this.domNode).style("visibility", "visible"); 
+            }
+            else {
+                this.inherited(arguments);
+            }
+            this._customerStarted = true;
+        }
+        
+    });
+});

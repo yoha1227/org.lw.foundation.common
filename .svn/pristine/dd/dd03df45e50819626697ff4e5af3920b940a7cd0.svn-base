@@ -1,0 +1,58 @@
+.claro{
+	font-size: 12px;
+}
+.f_l{
+	float: left;
+}
+.f_r{
+	float: right;
+}
+.disabled{
+	color: #CECECE;
+}
+
+.font16{
+	font-size: 16px;
+}
+
+.table-list{
+	border-collapse: collapse;
+	table-layout: fixed;
+	width: 100%;
+	height: 100%;
+}
+
+.table-list .t_l{
+	text-align: right;
+}
+
+.table-list .title{
+	width: 6em;
+}
+
+.table-list td{
+	height: 25px;
+	line-height: 25px;
+	padding: 5px;
+}
+.list_box .left{
+	width: 49%;
+	float: left;
+}
+.list_box .right{
+	width: 49%;
+	float: right;
+}
+
+.split{
+	visibility: hidden;
+	padding-top: 20px;
+	width: 100%;
+}
+
+fieldset{
+	border: 2px groove threedface; 
+	margin: 2px; 
+	padding: 0.75em; 
+	height: 100%;
+}

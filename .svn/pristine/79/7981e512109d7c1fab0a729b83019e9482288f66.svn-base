@@ -1,0 +1,118 @@
+define(
+		"affair_mngt/embedded_widgets/AffairEntryGrid",
+		[ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			"dojo/date/locale",
+			"dojo/store/Memory",
+			"dojo/dom-class",
+			"dojo/query",
+			"dojo/text!./templates/AffairEntryGrid.html",
+			"affairService/affairSummaryDtoStubAsStore",
+			"dgrid/OnDemandGrid",
+			"dgrid/extensions/Pagination"
+			],
+ 		function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
+ 				dateLocal, Memory, domClass, query, 
+ 				templateStr,  affairSummaryDtoStubAsStore, OnDemandGrid, Pagination) {
+					
+            
+            function dateTimeFormatter (item, value, node){
+				if (value) {
+					node.innerHTML = dateLocal.format(new Date(value), {
+						datePattern: "yyyy-MM-dd",
+						timePattern: "HH:mm:ss"
+					});
+				}
+            }
+            
+			return dojo.declare(
+					"affair_mngt.embedded_widgets.AffairEntryGrid", [
+							_WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin ], {
+						// Path to the template
+						templateString : templateStr,
+						
+						affairEntryStore : null,
+						affairEntryDataGrid : null,
+						
+						columns : [
+								     {field: 'id', label:'id'},
+								     {field: 'assitenCode', label:'助记码'},
+								     {field: 'unitName', label:'施工单位'},
+								     {field: 'linkMan', label:'联系人'},
+								     {field: 'tel',  label:'联系方式'},
+								     {field: 'crdate', renderCell: dateTimeFormatter, label:'创建时间'},
+								     {field: 'crname', label:'创建人'},
+								     {field: 'chk_sure', label:'审核'},
+								     {field: 'veriCode', label:'验证码'},
+								     {field: 'comment', label:'备注'}
+							    ],				
+						
+						createQueryFromEntity : function(entity) {
+							var query = {};
+							
+							for (var i in entity) {
+								if (entity[i]) {
+									if (dojo.isObject(entity[i])){
+										for (var j in entity[i]){
+											if (entity[i][j]) {
+												query[i + "." + j] = entity[i][j];
+											}
+										}
+									}else{
+										query[i] = entity[i];
+									}
+								}
+							}
+							
+							return query;
+						},
+						
+						// if the query has changed or added, then refresh gird
+						refreshByQuery : function(newQuery) {
+							
+							this.affairEntryDataGrid.set("query", newQuery);
+						},
+						
+						refreshByQueryEntity : function(entity) {
+							
+							this.affairEntryDataGrid.set("query", this.createQueryFromEntity(entity));
+						},
+				 
+						constructor : function() {
+							
+							this.affairEntryStore = affairSummaryDtoStubAsStore.getMvcStore();
+							
+						},
+
+					 
+						postMixInProperties : function() {
+						},
+ 
+						
+						postCreate : function() {
+							
+							var affairEntryGridWidget = query("table", this.domNode)[0];
+							
+							this.affairEntryDataGrid = new (dojo.declare("OnDemandGridWithPagination", 
+													[OnDemandGrid, Pagination]))({
+								store: this.affairEntryStore,
+								columns: this.columns,
+							    pagingLinks: false,
+					            pagingTextBox: true,
+					            firstLastArrows: true,
+					            pageSizeOptions: [10, 15, 25],
+					            loadingMessage:"加载中"
+							}, affairEntryGridWidget);
+							
+						},
+
+						startup: function(){
+							//this.inherited(arguments);
+							
+							this.affairEntryDataGrid.startup();
+						}
+						
+					});
+		});

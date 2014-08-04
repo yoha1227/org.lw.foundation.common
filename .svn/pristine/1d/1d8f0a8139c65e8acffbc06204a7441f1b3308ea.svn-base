@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>事件处理UI</title>
+
+<style>
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/document.css";
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css";
+	@import "../common/resource/style/main.css";
+	@import "../embedded_widgets/themes/OperationHistoryGrid.css";
+</style>
+
+<script type="text/javascript">
+	require([
+		"dijit/dijit",
+		"dojo/parser",
+		"maqetta/space",
+		"maqetta/AppStates",
+		"dijit/layout/TabContainer",
+		"dijit/layout/TabController",
+		"dijit/layout/ContentPane",
+		"dijit/form/Form",
+		"dijit/form/TextBox",
+		"dijit/form/Textarea",
+		"dijit/form/Button",
+		"affair_mngt/embedded_widgets/AffairEntryForm",
+		"affair_mngt/embedded_widgets/AffairEntryDetailForm",
+		"affair_mngt/embedded_widgets/CustomerInfoViewer",
+		"affair_mngt/embedded_widgets/OperationHistoryGrid"
+	]);
+
+	// entities to be edited
+	var defaultAffairEntry;
+	var defaultAffairEntryDetail;	//associated with affairEntry
+	var defaultCustomerInfo;
+	
+	operateHistoryStore = null;		
+	
+</script>
+
+<!-- fellow "mainController.js" should be added by sitemesh -->
+<!-- <script type="text/javascript" src="./mainController.js"></script> -->
+
+</head>
+
+<body class="claro" data-maq-flow-layout="true" data-maq-comptype="desktop" data-maq-ws="collapse"
+	id="affair_dispose" data-maq-appstates="{}">
+<div id="affair_dispose-RootNode" class="list_box">      
+    <div id="affair_dispose-affairEntryForm" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryForm" 
+            data-dojo-id="affairEntryForm"
+            data-dojo-props="defaultValueOfEntity: defaultAffairEntry" class="left"></div>
+    <div id="affair_dispose-affairEntryDetailForm" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryDetailForm" 
+        data-dojo-id="affairEntryDetailForm"
+        data-dojo-props="defaultValueOfEntity: defaultAffairEntryDetail" class="left"></div>
+    
+    <div class="split f_l"></div>
+    
+    <div id="affair_dispose-customerInfoViewer" data-dojo-type="affair_mngt/embedded_widgets/CustomerInfoViewer" 
+        data-dojo-id="customerInfoViewer"
+        data-dojo-props="defaultValueOfEntity: defaultCustomerInfo" class="left" style="600px;"></div>
+    <div id="affair_dispose-affairOperateHistoryPane" data-dojo-type="affair_mngt/embedded_widgets/OperationHistoryGrid" 
+        data-dojo-props="store: operateHistoryStore" class="left"></div>
+        
+    <div style="clear:both;"></div>
+    
+    <div style="text-align: right; padding-right: 20px;">
+        <input id="affair_dispose-submitBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="提交(submit)" iconClass="dijitNoIcon"> 
+        <input id="affair_dispose-rebaseBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="重置(rebase)" iconClass="dijitNoIcon"> 
+        <input id="affair_dispose-cleanBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="清空(clean)" iconClass="dijitNoIcon"> 
+        <input id="affair_dispose-undoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="取消(undo)" iconClass="dijitNoIcon">
+        <input id="affair_dispose-redoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="恢复(redo)" iconClass="dijitNoIcon">
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+ <decorators defaultdir="/common/decorators">
+    <excludes>
+        <pattern>/*.js</pattern>
+        <pattern>/*.json</pattern>
+        <pattern>/*templates/*</pattern>
+    </excludes>
+    <decorator name="UiEntry" page="uiEntryDecorator.jsp">
+		<pattern>*index.html</pattern>
+		<pattern>*Portal.html</pattern>
+		<pattern>*UiEntry.html</pattern>
+		<pattern>*Testsuite.html</pattern>
+		<pattern>*Testcase.html</pattern>
+    </decorator>
+    <decorator name="View" page="viewDecorator.jsp">
+		<pattern>*View.html</pattern>
+    </decorator>
+</decorators>

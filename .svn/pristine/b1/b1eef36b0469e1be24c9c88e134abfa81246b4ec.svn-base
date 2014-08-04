@@ -1,0 +1,12 @@
+/**
+ * 操作状态
+ */
+function OperateState() {
+	this.stateName = "登记";
+	this.stateValue = "submitted";
+}
+
+function OperateState(name, value) {
+	this.stateName = name;
+	this.stateValue = value;
+}

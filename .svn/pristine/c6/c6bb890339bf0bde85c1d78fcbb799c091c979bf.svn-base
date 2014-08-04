@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>事件受理UI</title>
+
+<style>
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/document.css";
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css";
+	@import "../common/resource/style/main.css";
+	@import "../embedded_widgets/themes/OperationHistoryGrid.css";
+</style>
+
+<script type="text/javascript">
+	require([
+		"dijit/dijit",
+		"dojo/parser",
+		"maqetta/space",
+		"maqetta/AppStates",
+		"dijit/layout/TabContainer",
+		"dijit/layout/TabController",
+		"dijit/layout/ContentPane",
+		"dijit/form/Form",
+		"dijit/form/TextBox",
+		"dijit/form/Textarea",
+		"dijit/form/Button",
+		"affair_mngt/embedded_widgets/UnitEntryForm",
+		"affair_mngt/embedded_widgets/AffairEntryGrid"
+	]);
+
+	
+</script>
+
+<!-- fellow "mainController.js" should be added by sitemesh -->
+<!-- <script type="text/javascript" src="./mainController.js"></script> -->
+
+</head>
+
+<body class="claro" data-maq-flow-layout="true" data-maq-comptype="desktop" data-maq-ws="collapse"
+	id="affair_accept" data-maq-appstates="{}">
+<div id="affair_accept-RootNode" class="list_box">	
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="myDialog" title="编辑施工单位信息" id="affair_accept-Dialog">
+	<div id="affair_accept-unitEntryForm" data-dojo-type="affair_mngt/embedded_widgets/UnitEntryForm" 
+            data-dojo-id="unitEntryForm"
+           class="left"></div>
+           
+</div>
+
+    
+    <div style="text-align: right; padding-right: 20px;">
+        <input id="affair_accept-addBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="新增" iconClass="Add" >
+        <input id="affair_accept-submitBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="提交(submit)" iconClass="dijitNoIcon"> 
+        <input id="affair_accept-rebaseBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="重置(rebase)" iconClass="dijitNoIcon"> 
+        <input id="affair_accept-cleanBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="清空(clean)" iconClass="dijitNoIcon"> 
+        <input id="affair_accept-undoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="取消(undo)" iconClass="dijitNoIcon">
+        <input id="affair_accept-redoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="恢复(redo)" iconClass="dijitNoIcon">
+    </div>
+    <div id="affair_query-affairEntryGrid" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryGrid" 
+    		data-dojo-id="affairEntryGrid" ></div>
+</div>	
+</body>
+</html>

@@ -1,0 +1,32 @@
+/**
+ * service entry point utils
+ */
+define(["dojo/request",
+        "dojo/json"
+       ], function(request, json) {
+	
+	var serverContextPath = "/service/itdc/itsm";
+	var servicePath = "/resteasy/webservice-restful";
+	
+	var serverContextPathDMP = "/dmpServer/resteasy";
+	var servicePathDMP = "";
+	
+	var serviceEntryPoint = {
+			
+	};
+	
+	serviceEntryPoint.getContextPath = function() {
+		return serverContextPath + servicePath;
+	};
+	
+	serviceEntryPoint.getContextPathDMP = function() {
+		return serverContextPathDMP + servicePathDMP;
+	};
+
+	serviceEntryPoint.getServerContextPath = function() {
+		return serverContextPath;
+	};
+
+	return serviceEntryPoint;
+
+});

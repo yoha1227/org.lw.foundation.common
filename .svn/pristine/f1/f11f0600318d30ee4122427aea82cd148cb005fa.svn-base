@@ -1,0 +1,48 @@
+// global variable for singleton
+// using top.window._modelRepository
+
+define([
+        "dojo/_base/kernel", 
+        "dojo/require", 
+        "dojo/_base/array",
+        "dojo/Stateful"
+        ], 
+    function(dojo, require, array, Stateful) {
+	
+	// bootstrap code when require module in client code:
+	if ((typeof top.window._modelRepository == "undefined") || (top.window._modelRepository ==  null))
+		top.window._modelRepository = new Array();
+
+	return {
+		
+		_getModelById : function(id) {
+
+			return top.window._modelRepository[id];
+		},
+		
+		getModelById : function(id) {
+
+			var model = this._getModelById(id);
+			if ((typeof model == "undefined") || (model == null)) {
+				model = new Stateful();
+				this.setModelAsId(id, model);
+			}
+			
+			return model;
+		},
+		
+		setModelAsId : function(id, model) {
+
+			top.window._modelRepository[id] = model;
+		},
+		
+		load : function(
+				  id,        // the string to the right of the !
+				  require,   // AMD require; usually a context-sensitive require bound to the module making the plugin request
+				  callback   // the function the plugin should call with the return value once it is done
+			){
+			
+		} 	
+	
+	};
+});

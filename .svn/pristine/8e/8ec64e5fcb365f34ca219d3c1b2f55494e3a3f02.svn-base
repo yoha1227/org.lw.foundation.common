@@ -1,0 +1,188 @@
+define(
+		"affair_mngt/embedded_widgets/OperationHistoryGrid",
+		[ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			"dojo/date/locale",
+			"dojo/store/Memory",
+			"dojo/dom-class",
+			"dojo/query",
+			"dojo/_base/lang",
+			"dojo/text!./templates/OperationHistoryGrid.html",
+			"affairService/userAccountDaoStub",
+			"affairService/operateStateMetaoStub",
+			"dgrid/OnDemandGrid"
+			],
+ 		function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
+ 				dateLocal, Memory, domClass, query, lang,
+ 				templateStr, userAccountDaoStub, operateStateMetaoStub, OnDemandGrid
+ 		) {
+
+			var deferredOperateStateStore = operateStateMetaoStub.findAllEntities().then(function(response){
+                return new Memory({data: response, idProperty: "index"});
+            });
+			
+			//formatters for grid field:
+			function operatorFormatter (item, value, node){
+				if (value) {
+					//账户信息
+					userAccountDaoStub.getEntityById(value.id).then(function(userInfo){
+						if (userInfo) {
+							node.innerHTML = userInfo.name;
+						}
+					})
+				}
+            }
+			
+			function operateStateFormatter(item, value, node){
+				deferredOperateStateStore.then(function(store){
+					node.innerHTML = store.get(value).stateName;
+				})
+			}
+            
+            function operateTimeFormatter (item, value, node){
+				if (value) {
+					node.innerHTML = dateLocal.format(new Date(value), {
+						datePattern: "yyyy-MM-dd",
+						timePattern: "HH:mm:ss"
+					});
+				}
+            }
+            
+			return dojo.declare(
+					"affair_mngt.embedded_widgets.OperationHistoryGrid", [
+							_WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin ], {
+						// Path to the template
+						templateString : templateStr,
+						
+						//操作状态元数据延迟对象
+						deferredOperateStateStore: deferredOperateStateStore,
+						
+						operationHistoryStore: null,				
+						_mixinOperationHistoryStore : null,
+						
+						_historyIds:[],
+						
+						columns: [
+                            {field: 'stateName', label:'事件处理历史', sortable: false},
+                            {field: 'operator', renderCell: operatorFormatter, label:'经办人', sortable: false},
+                            {field: 'operateTime', renderCell: operateTimeFormatter, label:'处理时间', sortable: false},
+                        ],
+						
+						"class": "OperationHistoryGrid",
+						
+						_setClassAttr: function(cssClass){
+							this.gridWidgetNode.set({
+                                "class": cssClass
+                            })
+						},
+						
+						/**
+						 * 将相同操作步骤（operateState相同）的历史记录“归一”，每种操作状态只留下时间最靠后的一条记录
+						 */
+						_mixinTargetStoreByIdProperty: function(targetStore){
+							var idProperty = targetStore.idProperty;
+							var self = this;
+							targetStore.query().forEach(function(item){
+								// 将对应的操作历史记录中的属性mixin入状态表
+								// todo: get(item[ idProperty ])应当进行时间倒排序，找出最晚的对应记录
+								var latestOperateHistoryRecord = self.operationHistoryStore.query({"operateStep": item[ idProperty ]}, {sort: [{attribute:"operateTime", descending: true}], count: 1});
+								targetStore.put(lang.mixin(item, latestOperateHistoryRecord.total>0 ? latestOperateHistoryRecord[0] : {}));
+                            })
+							return targetStore;
+						},
+						
+						/**
+						 * 高亮当前操作状态
+						 */
+						_setDifferClass: function(){
+							var differClass = ["currentOperateState", "otherOperateState"];
+							var self = this;
+							var row;
+							var isFutureOperateState = false;
+							
+							query(".dgrid-row", this.gridWidgetNode.get("contentNode")).forEach(function(item){
+								row = self.gridWidgetNode.row(item);
+								if (row.data.operateTime || isFutureOperateState){
+									cssClass = differClass[1];
+								} else {
+									isFutureOperateState = true;
+									cssClass = differClass[0];
+								}
+								domClass.remove(row.element, differClass);
+								domClass.add(row.element, cssClass);
+							})
+							
+						},
+						
+						// if OperationHistory has changed or added, then rebase the gird for NewStore
+						rebaseFromNewStore : function(newOperationHistoryStore) {
+							self.operationHistoryStore = newOperationHistoryStore;
+							
+							self.deferredOperateStateStore.then(function(store){
+								
+								self._mixinOperationHistoryStore = self._mixinTargetStoreByIdProperty(store);
+								
+								//init grid with mixin store
+								self.gridWidgetNode.set({
+									store: self._mixinOperationHistoryStore,
+									columns: self.columns								
+								});
+                                self._setDifferClass();
+							});
+						},
+						
+						// Override this method to perform custom behavior during dijit construction.
+						// Common operations for constructor:
+						// 1) Initialize non-primitive types (i.e. objects and arrays)
+						// 2) Add additional properties needed by succeeding lifecycle methods
+						constructor : function() {
+							
+						},
+
+						// When this method is called, all variables inherited from superclasses are 'mixed in'.
+						// Common operations for postMixInProperties
+						// 1) Modify or assign values for widget property variables defined in the template HTML file
+						postMixInProperties : function() {
+						},
+
+						// postCreate() is called after buildRendering().  This is useful to override when 
+						// you need to access and/or manipulate DOM nodes included with your widget.
+						// DOM nodes and widgets with the dojoAttachPoint attribute specified can now be directly
+						// accessed as fields on "this". 
+						// Common operations for postCreate
+						// 1) Access and manipulate DOM nodes created in buildRendering()
+						// 2) Add new DOM nodes or widgets 
+						postCreate : function() {
+							var self = this;
+							
+							if (self.operationHistoryStore == null) {
+								self.operationHistoryStore = new Memory({
+									data : [
+										    {"operateStep":"1","operateTime":1363525471081,"operator":{"id":1,"departments":[]}}
+										],
+										idProperty: 'operateStep'
+									});
+							}
+							
+							self.deferredOperateStateStore.then(function(store){
+								
+								self._mixinOperationHistoryStore = self._mixinTargetStoreByIdProperty(store);
+								
+								//init grid with mixin store
+								self.gridWidgetNode.set({
+									store: self._mixinOperationHistoryStore,
+									columns: self.columns
+								});
+                                self._setDifferClass();
+							});
+						},
+
+						startup: function(){
+							
+							this.inherited(arguments);
+						}
+						
+					});
+		});

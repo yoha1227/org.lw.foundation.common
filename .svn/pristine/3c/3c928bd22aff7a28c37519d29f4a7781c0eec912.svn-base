@@ -1,0 +1,25 @@
+/**
+ * 由于sizzle的filter方法与dojo自身的选择器引擎的filter方法参数（顺序）不一致，所以导致使用sizzle时，
+ * sizzle会报错表达式错误，因此在使用sizzle时，需要使用本插件进行修正。 本插件并非必须加载，只有用到filter相关的方法时才需要。比如:
+ * NodeList.filter,NodeList.parents(".class")等等
+ * 在使用本插件前，请确保使用的是sizzle选择器引擎，否则可能会出现其他异常
+ * 
+ * @date 2012.5.23
+ * @author zengwz@suntang.com
+ */
+define([ "dojo/query", 
+         "dojo/_base/lang" ], 
+    function(query, lang) {
+	// function _filterResult(nodes, selector, root){
+	// return new query.NodeList(query.filter(selector, nodes, root));
+	// }
+	//    
+	// dojo._filterQueryResult = query._filterResult = _filterResult;
+	var _oldFilter = query.filter;
+	
+	function filter(nodes, selector, root) {
+		return _oldFilter(selector, nodes);
+	}
+	
+	query.filter = filter;
+});

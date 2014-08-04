@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>华之毅时尚集团Dojo框架</title>
+<style type="text/css">
+html,body {
+	height: 100%;
+	width: 100%;
+}
+</style>
+<style type="text/css">
+@import "/DMP/dojo-release-1.8.3/dijit/themes/claro/claro.css";
+@import "/DMP/dojo-release-1.8.3/dojo/resources/dojo.css";
+@import "/DMP/dojo-release-1.8.3/resources/css/icon.css";
+@import
+	"/DMP/dojo-release-1.8.3/dojox/grid/enhanced/resources/claro/EnhancedGrid.css"
+	;
+
+@import
+	"/DMP/dojo-release-1.8.3/dojox/grid/enhanced/resources/Pagination.css";
+</style>
+<script type="text/javascript"
+	src="/DMP/dojo-release-1.8.3/dojo/dojo.js"
+	data-dojo-config="'parseOnLoad':true,'async':true"></script>
+<script type="text/javascript">
+	require([ "dijit/dijit", "dojo/parser", "dojox/io/xhrScriptPlugin",
+			"dojox/grid/EnhancedGrid", 
+			"dojox/grid/enhanced/plugins/Pagination",
+			"dojo/data/ItemFileWriteStore", "dojox/data/CsvStore",
+			"dijit/Toolbar", "dijit/ToolbarSeparator", "dijit/form/Button",
+			"dijit/form/ComboBox", "dojox/grid/_CheckBoxSelector",
+			"dojox/grid/cells", 'dojo/date/stamp', 'dojo/date/locale',"dojo/window",
+			"dijit/Dialog", "dijit/form/TextBox", "dijit/form/Button","dijit/form/Form","dojo/_base/array",
+			"dijit/form/CheckBox" ]);
+</script>
+<script type="text/javascript">
+	/*
+	1.读取 √
+	2.刷新
+	3.分页
+	4.查询
+	5.新增 √
+	6.修改 √
+	7.删除 √
+	8.Loading效果	
+	*/
+	//时间转换
+	function formatDate(date) {
+		var obj = eval('(' + "{Date: new Date(" + date + ")}" + ')');
+		var dateValue = obj["Date"];
+		//return dateValue.toLocaleString();
+		/* Format the value in store, so as to be displayed.*/
+		//var d = dojo.date.stamp.fromISOString(datum);
+		return dojo.date.locale.format(dateValue, {
+			selector : 'date',
+			formatLength : 'long'
+		});
+	}
+	require([ "dojo/ready" ], function(ready) {
+		ready(function() {
+			var grid;
+			var gridStore;
+			//读取数据到Grid
+			dojo.xhrGet({
+				url : "/dmpServer/resteasy/matUnit/GetAll",
+				load : function(response, ioArgs) {
+					var data = {
+						identifier : "id",
+						items : dojo.fromJson(response)
+					};
+					gridStore = new dojo.data.ItemFileWriteStore({
+						data : data
+					});
+					var structure = [ 
+					{
+						type : "dojox.grid._CheckBoxSelector",
+						width : 3
+					}, 
+					[ 
+					  new dojox.grid.cells.RowIndex({
+						width : 2,
+						name : ''
+					}), 
+					{
+						name : "ID",
+						field : "id",
+						width : "120px",
+						hidden : true
+					}, {
+						name : "助记码",
+						field : "assitenCode",
+						width : "40px;"
+					}, {
+						name : "施工单位",
+						field : "unitName",
+						width : "80px"
+					}, {
+						name : "联系人",
+						field : "linkMan",
+						width : "70px"
+					}, {
+						name : "联系方式",
+						field : "tel",
+						width : "80px"
+					}, {
+						name : "创建时间",
+						field : "crdate",
+						width : "85px",
+						formatter : formatDate
+					}, {
+						name : "创建人",
+						field : "crname",
+						width : "60px"
+					}, {
+						name : "审核",
+						field : "chk_sure",
+						width : "40px"
+					}, {
+						name : "验证码",
+						field : "veriCode",
+						width : "80px"
+					}, {
+						name : "备注",
+						field : "comment",
+						width : "100px"
+					} ] ];
+					grid = new dojox.grid.DataGrid({
+						id : 'grid',
+						store : gridStore,
+						structure : structure,
+						style : 'height:500px',
+						onRowDblClick:GridRowClick,
+						plugins : {
+							pagination : {
+								pageSizes : [ "25", "50", "100", "All" ],
+								description : true,
+								sizeSwitch : true,
+								pageStepper : true,
+								gotoButton : true,
+								/*page step to be displayed*/
+								maxPageStep : 4,
+								/*position of the pagination bar*/
+								position : "bottom"
+							}
+						}
+					}, "MainGrid");
+					grid.startup();
+					return response; //必须返回response
+				},
+				error : function(response, ioArgs) {
+					console.log("xhr get failed:", response);
+					return response; //必须返回response
+				}
+			});
+			GridRowClick=function (e) {
+		        item = grid.getItem(e.rowIndex);
+		        myForm.setValues(item);
+		        myDialog.show();
+			};
+			//绑定工具栏方法
+			dojo.connect(dijit.byId("btnAdd"), "onClick", function(event){
+				myForm.reset();
+				myDialog.show(); 
+			});
+			//刷新-无效
+			dojo.connect(dijit.byId("btnReflash"), "onClick", function(event){
+				grid._refresh();
+			});
+			dojo.connect(dijit.byId("btnDel"), "onClick", function(event){
+				/* Get all selected items from the Grid: */
+		        var items = grid.selection.getSelected();
+		        if(items.length){
+		        	//直接写dojo._base.array不识别
+		        	require(["dojo/_base/array"], function(array){
+		               array.forEach(items, function(selectedItem){
+			                if(selectedItem !== null){
+			                	DelRecord(selectedItem);
+			                	//应该判断是否真的删除后再移除
+			                	gridStore.deleteItem(selectedItem);
+			                }
+		            	});
+		        	});
+		        }
+			});
+		});
+	});
+	//删除
+	function DelRecord(record){
+		var xhrArgs = {
+			      url: "/dmpServer/resteasy/matUnit/"+record.id,
+			      contentType:'application/json;charset=UTF-8',
+			      handleAs: "json",
+			      load: function(data){
+			    	  
+			      },
+			      error: function(error){
+			    	  alert("删除失败，请您重试!");
+			      }
+			    };
+	    //dojo.byId("response2").innerHTML = "Message being sent..."
+	    // Call the asynchronous xhrPost
+	    var deferred = dojo.xhrDelete(xhrArgs);
+	};
+	//保存，更新
+	function UpdateRecord(){
+		var record=myForm.getValues();
+		if(record.id!=''){//更新
+			var xhrArgs = {
+				      url: "/dmpServer/resteasy/matUnit/"+record.id,
+				      contentType:'application/json;charset=UTF-8',
+				      putData: dojo.toJson(record,true),//'{"id":1,"name":"121321"}'//这里注意下要转成字符串型的,json格式不识别
+				      handleAs: "json",
+				      load: function(data){
+				        alert("恭喜您，保存成功!");
+				        //gridStore.newItem(record);
+				        myDialog.onCancel();
+				      },
+				      error: function(error){
+				    	  alert("保存失败，请您重试!");
+				      }
+				    };
+		    //dojo.byId("response2").innerHTML = "Message being sent..."
+		    // Call the asynchronous xhrPost
+		    var deferred = dojo.xhrPut(xhrArgs);
+		}
+		else{//新增
+			var xhrArgs = {
+				      url: "/dmpServer/resteasy/matUnit/",
+				      putData: dojo.toJson(record,true),
+				      contentType:'application/json;charset=UTF-8',
+				      handleAs: "json",
+				      load: function(data){
+				    	  alert("恭喜您，保存成功!");
+				    	  //gridStore.newItem(record);
+				    	  myDialog.onCancel();
+				      },
+				      error: function(error){
+				    	  alert("保存失败，请您重试!");
+				      }
+			};
+		    var deferred = dojo.xhrPost(xhrArgs);
+		}		
+	};
+</script>
+</head>
+<body class="claro">
+	<span data-dojo-type="dijit.Toolbar"> <input type="button" id="btnAdd"
+		data-dojo-type="dijit.form.Button" tabIndex="-1" iconClass="Add"
+		intermediateChanges="false" label="新增" iconClass="dijitNoIcon"></input>
+		 <input type="button"
+		data-dojo-type="dijit.form.Button" tabIndex="-1" id="btnDel" iconClass="Cross"
+		intermediateChanges="false" label="删除" iconClass="dijitNoIcon"></input>
+		<span data-dojo-type="dijit/ToolbarSeparator"></span> <input
+		type="button" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Recordred" intermediateChanges="false" label="审核"
+		iconClass="dijitNoIcon"></input> <input type="button"
+		data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Recordgreen" intermediateChanges="false" label="反审核"
+		iconClass="dijitNoIcon"></input> <span
+		data-dojo-type="dijit/ToolbarSeparator"></span> <select
+		data-dojo-type="dijit.form.ComboBox" value="全部" tabIndex="-1"
+		intermediateChanges="false" trim="false" uppercase="false"
+		lowercase="false" propercase="false" invalidMessage="$_unset_$"
+		pageSize="Infinity" searchDelay="200" style="width: 62px;">
+			<option value="全部" selected="true">全部</option>
+			<option value="未审核">未审核</option>
+			<option value="已审核">已审核</option>
+	</select> <input type="button" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Zoom" intermediateChanges="false" id="btnReflash" label="查询"></input> </span>
+	<div id="MainGrid"></div>
+	
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="myDialog" title="编辑施工单位信息">
+	<div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm"
+encType="multipart/form-data" action="" method="">
+    <table class="dijitDialogPaneContentArea">
+    	<tr style="display:none;">
+            <td><label for="id">编号:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" readonly="readonly" name="id" id="id"></td>
+        </tr>
+        <tr>
+            <td><label for="assitenCode">助记码:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="assitenCode" id="assitenCode"></td>
+        </tr>
+        <tr>
+            <td><label for="unitName">施工单位:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="unitName" id="unitName"></td>
+        </tr>
+        <tr>
+            <td><label for="linkMan">联系人:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="linkMan" id="linkMan"></td>
+        </tr>
+        <tr>
+            <td><label for="tel">联系电话:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="tel" id="tel"></td>
+        </tr>
+        <tr>
+            <td><label for="veriCode">验证码:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="veriCode" id="veriCode"></td>
+        </tr>
+        <tr>
+            <td><label for="comment">备注:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="comment" id="comment"></td>
+        </tr>
+    </table>
+</div>
+    <div class="dijitDialogPaneActionBar">
+        <button dojoType="dijit.form.Button" type="button" onClick="UpdateRecord();" id="ok">保存</button>
+        <button dojoType="dijit.form.Button" type="button" onClick="myDialog.onCancel();"
+                id="cancel">取消</button>
+    </div>
+</div>
+</body>
+</html>

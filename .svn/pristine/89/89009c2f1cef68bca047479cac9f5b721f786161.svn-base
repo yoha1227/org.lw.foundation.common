@@ -1,0 +1,61 @@
+define(
+		"affair_mngt/embedded_widgets/UnitEntryForm",
+		[ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			"dojo/store/Memory",
+			"dojo/query",
+			"dojo/json",
+			"dojo/dom-class",
+			"dojo/_base/lang",
+			"dojo/_base/array",
+			// import modules will be inherited by our widget:
+			"dojox3rd/widget_template/SimpleEntityEditorForm",
+			"dojo/text!./templates/UnitEntryForm.html",
+			// import modules used by our widget:
+			"dijit/registry",
+			"dijit/form/DateTextBox",
+			"dojox3rd/widget/DateTextBox"
+		],
+		function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Memory, query, json, domClass,
+		   lang, array,  SimpleEntityEditorForm, templateStr, registry ) {
+		   	
+			return dojo.declare("affair_mngt.embedded_widgets.UnitEntryForm",
+					[ _WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin,
+							// the modules will be inherited by our widget:
+							dojox3rd.widget_template.SimpleEntityEditorForm
+							], {
+						// Path to the template
+						templateString : templateStr,
+						 
+						constructor : function() {
+							
+						},
+
+						
+						postMixInProperties : function() {
+							var self = this;
+							
+							this.inherited(arguments);
+							
+							
+						},
+
+						
+						postCreate : function() {
+							this.inherited(arguments);	
+							this._resizeTable();
+						},
+						
+						_resizeTable: function(){
+//							domGeometry.setMarginBox(this.formNode.domNode, domGeometry.getContentBox(this.domNode) );
+						},
+						
+						startup: function(){
+							this.inherited(arguments);
+							
+						}					
+						
+					});
+		});

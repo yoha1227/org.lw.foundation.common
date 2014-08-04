@@ -1,0 +1,72 @@
+require([
+	"dojo/store/Memory",
+	"dojo/request",
+	"dijit/registry",
+	"dojo/parser", 
+	"dojo/query",
+	"dojo/dom",
+	"dojo/topic",
+	"dojox3rd/utils/urlParsers",
+	"dojox3rd/sys/modelSingleton", 
+	"dojox3rd/sys/topicSingleton", 
+	"dojo/_base/array",
+	"dojo/domReady!"
+	],
+function(Memory, request, registry, parser, query, dom, topic, urlParsers, modelSingleton, topicSingleton, array) {
+	
+	var viewScopePrefix = "affair_mngt";
+	
+	parser.parse({
+		rootNode: viewScopePrefix + "-" + "RootNode"
+//	    scope: viewScopePrefix
+	  }).then(function(){
+		var affairMngtTab = dom.byId(viewScopePrefix + "-" + "RootNode");
+		
+		var tab = registry.byNode( query("[role=tabpanel]")[0] );
+		
+		function tabSelectChildByIndex(index){
+			tab.selectChild( (tab.getChildren())[index] );
+		}
+		
+        var list = [
+          "./affair_submit/mainView.html",
+          "./affair_assign/mainView.html",
+		  "./affair_accept/mainView.html",
+		  "./affair_dispose/mainView.html",
+		  "./affair_add_to_knowledge/mainView.html",
+		  "./knownledge_mngt/mainView.html",
+        ];
+        //<iframe class='iframe' src="./affair_submit/mainView.html"  style="height: 100%; width: 100%"></iframe>
+		list = array.map(list, function(item){
+			return '<iframe class="iframe" src="'+item+'"  style="height: 100%; width: 100%"></iframe>';
+		})
+		
+		
+        var tabSelectedWidget = tab.get("selectedChildWidget");
+        if (dojo.trim( tabSelectedWidget.get("content") ) == ""){
+            tabSelectedWidget.set("content", list[ tab.getIndexOfChild(tabSelectedWidget) ]);
+        }
+        tab.watch("selectedChildWidget", function(name, oldValue, newValue){
+            if (dojo.trim( newValue.get("content") ) == ""){
+                newValue.set("content", list[ tab.getIndexOfChild(newValue) ]);
+            }
+        })
+		
+		var urlParams = urlParsers.getUrlParams();
+		
+		if (urlParams.tabIndex) {
+			tabSelectChildByIndex(urlParams.tabIndex);
+		}
+		
+		if(urlParams.affair_id){
+			//全局变量，当前事件ID
+			dojo.cur_affair_id = urlParams.affair_id;
+		}
+		
+		
+		modelSingleton.getModelById("menu").watch("params", function(name, oldValue, newValue){
+			var index = newValue.replace("tabIndex=", "");
+			tabSelectChildByIndex(index);
+		})
+	});
+});

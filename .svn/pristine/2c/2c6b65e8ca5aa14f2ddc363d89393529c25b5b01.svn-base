@@ -1,0 +1,123 @@
+define(
+		"affair_mngt/embedded_widgets/AffairEntryForm",
+		[ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			"dojo/store/Memory",
+			"dojo/query",
+			"dojo/json",
+			"dojo/dom-class",
+			"dojo/_base/lang",
+			"dojo/_base/array",
+			"dijit/form/FilteringSelect",
+			// import modules will be inherited by our widget:
+			"dojox3rd/widget_template/SimpleEntityEditorForm",
+			"dojo/text!./templates/AffairEntryForm.html",
+			"affairService/userAccountDaoStub",
+			// import modules used by our widget:
+			"dijit/registry",
+			"dijit/form/DateTextBox",
+			"dojox3rd/widget/DateTextBox"
+		],
+		function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Memory, query, json, domClass,
+		   lang, array, FilteringSelect, SimpleEntityEditorForm, templateStr, userAccountDaoStub, registry ) {
+		   	
+			return dojo.declare("affair_mngt.embedded_widgets.AffairEntryForm",
+					[ _WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin,
+							// the modules will be inherited by our widget:
+							dojox3rd.widget_template.SimpleEntityEditorForm
+							], {
+						// Path to the template
+						templateString : templateStr,
+						
+				        // Override this method to perform custom behavior during dijit construction.
+						// Common operations for constructor:
+						// 1) Initialize non-primitive types (i.e. objects and arrays)
+						// 2) Add additional properties needed by succeeding lifecycle methods
+						constructor : function() {
+							
+						},
+
+						// When this method is called, all variables inherited from superclasses are 'mixed in'.
+						// Common operations for postMixInProperties
+						// 1) Modify or assign values for widget property variables defined in the template HTML file
+						postMixInProperties : function() {
+							var self = this;
+							
+							this.inherited(arguments);
+							
+							//初始化负责人和协助人
+							userAccountDaoStub.findAllEntities().then(function(response){
+				                var store = new Memory({
+									data: response
+								});
+								var rows = query("tr", self.domNode);
+								var filterSelect = [];
+								filterSelect[0] = registry.byNode(rows.at(7).query("[widgetid]")[0]);
+								filterSelect[1] = registry.byNode(rows.at(8).query("[widgetid]")[0]);
+								
+								array.map(filterSelect, function(item){
+									item.set({
+										store: store,
+										searchAttr: "name"
+									});
+								});
+								
+								
+				            }, function(e){
+				                throw new Error("获取用户列表出错");
+				            })
+						},
+
+						// postCreate() is called after buildRendering().  This is useful to override when 
+						// you need to access and/or manipulate DOM nodes included with your widget.
+						// DOM nodes and widgets with the dojoAttachPoint attribute specified can now be directly
+						// accessed as fields on "this". 
+						// Common operations for postCreate
+						// 1) Access and manipulate DOM nodes created in buildRendering()
+						// 2) Add new DOM nodes or widgets 
+						postCreate : function() {
+							this.inherited(arguments);	
+							this._resizeTable();
+						},
+						
+						_resizeTable: function(){
+//							domGeometry.setMarginBox(this.formNode.domNode, domGeometry.getContentBox(this.domNode) );
+						},
+						
+						startup: function(){
+							this.inherited(arguments);
+							
+						},
+						
+						enableRow: function(){
+							var row = this._getRow(row);
+                            this._setRowStatus(row, "enabled");
+						},
+						
+						disableRow: function(row){
+							var row = this._getRow(row);
+							this._setRowStatus(row, "disabled");
+						},
+						
+						_getRow: function(row){
+							if (!isNaN(row)){
+								row = query("tr", this.domNode).at(row);
+							}
+							return query(row);
+						},
+						
+						_setRowStatus: function(row, status){
+							var head = row.query(">td")[0];
+							var widget = registry.byNode( row.query("[widgetid]")[0] );
+							if (status == "enabled"){
+								domClass.remove(head, "disablea");
+								widget.set("disabled", false);
+							}else{
+								domClass.add(head, "disabled");
+								widget.set("disabled", true);
+							}
+						}
+					});
+		});

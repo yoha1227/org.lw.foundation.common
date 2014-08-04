@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>事件查询UI</title>
+
+<style>
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/document.css";
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css";
+	@import "http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/dgrid.css";
+	@import "http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/skins/claro.css";
+	@import "../common/resource/style/main.css";
+</style>
+
+<script type="text/javascript">
+	require([ 
+	        "dijit/dijit", 
+	        "maqetta/space", 
+	        "maqetta/AppStates", 
+	        "dijit/form/Form",
+			"dijit/form/Button", 
+			"affair_mngt/embedded_widgets/AffairEntryGrid",
+			"affair_mngt/embedded_widgets/AffairEntryFilterPanel"
+			]);
+	
+</script>
+
+<!-- fellow "mainController.js" should be added by sitemesh -->
+<!-- <script type="text/javascript" src="./mainController.js"></script> -->
+
+</head>
+
+<body data-maq-flow-layout="true" data-maq-comptype="desktop" data-maq-ws="collapse" id="affair_query" data-maq-appstates="{}">
+<div id="affair_query-RootNode" class="claro">		
+    	<div id="affair_query-affairEntryGrid" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryGrid" 
+    		data-dojo-id="affairEntryGrid" ></div>
+		<div style="clear: both;"></div>
+    	<div class='claro' id="affair_query-affairEntryFilterPanel" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryFilterPanel" 
+    		data-dojo-id="affairEntryFilterPanel" ></div>
+		<div style="clear: both;"></div>
+		<div style="text-align: left; padding-left: 30px;">
+			<input id="affair_query-submitBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="查询(submit)" iconClass="dijitNoIcon"> 
+			<input id="affair_query-cleanBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="清空(clean)" iconClass="dijitNoIcon"> 
+			<input id="affair_query-undoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="取消(undo)" iconClass="dijitNoIcon">
+			<input id="affair_query-redoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="恢复(redo)" iconClass="dijitNoIcon">
+		</div>
+</div>
+</body>
+</html>

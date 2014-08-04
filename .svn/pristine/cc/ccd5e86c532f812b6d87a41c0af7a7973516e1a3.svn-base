@@ -1,0 +1,15 @@
+define(["dojo/request",
+        "dojo/json",
+		"service_stub/itsmServiceEntryPoint",
+//		"dojox3rd/restfulstub/CrudableRestfulStubRequestImpl"
+		"dojox3rd/restfulstub/CrudableRestfulStubStoreImpl"
+        ], function(request, json, serverContextPathDMP, CrudableRestfulServiceStub) {
+	
+	var serviceBaseUrl = serverContextPathDMP + "/dmpServer/resteasy/matUnit/GetAll";
+	var serviceBaseUrl1 = serviceEntryPoint.getContextPath() + "/dmpServer/resteasy/matUnit/GetAll";
+	var timeout = 2000;
+	alert(serviceBaseUrl1);
+	alert(serviceBaseUrl);
+	return new CrudableRestfulServiceStub(serviceBaseUrl, timeout);
+
+});

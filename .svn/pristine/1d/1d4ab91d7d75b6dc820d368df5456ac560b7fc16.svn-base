@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>事件管理UI</title>
+
+<style>
+    @import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/document.css";
+    @import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css";
+    @import "common/resource/style/main.css";
+</style>
+
+<script type="text/javascript">
+    require([ "dijit/layout/TabContainer", 
+              "dijit/layout/TabController", 
+              "dijit/layout/BorderContainer", 
+              "dijit/layout/ContentPane"
+            ]);
+</script>
+
+<!-- fellow "mainController.js" should be added by sitemesh -->
+<!-- <script type="text/javascript" src="./mainController.js"></script> -->
+
+</head>
+<body class="claro" >
+<div id="affair_mngt-RootNode" class="claro">
+    <span data-dojo-type="dijit/layout/TabContainer"
+        style="min-width: 1em; min-height: 1em; width: 1000px; height: 900px;" tabStrip="true">
+        <div data-dojo-type="dijit/layout/ContentPane" title="登记事件"
+            style="overflow: hidden;" extractContent="false" preventCache="false" preload="true"
+            refreshOnShow="false" doLayout="true" selected="true" closable="false">
+            
+		</div>
+        <div data-dojo-type="dijit/layout/ContentPane" title="派工"
+            style="overflow: hidden;" extractContent="false" preventCache="false" preload="false"
+            refreshOnShow="false" doLayout="true" selected="false" closable="false">
+        </div>
+        <div data-dojo-type="dijit/layout/ContentPane" title="受理" extractContent="false"
+            style="overflow: hidden;" extractContent="false" preventCache="false" preload="false"
+            refreshOnShow="false" doLayout="true" selected="false" closable="false"">
+		</div>
+        <div data-dojo-type="dijit/layout/ContentPane" title="处理" extractContent="false"
+            style="overflow: hidden;" extractContent="false" preventCache="false" preload="false"
+            refreshOnShow="false" doLayout="true" selected="false" closable="false">
+        </div>
+        <div data-dojo-type="dijit/layout/ContentPane" title="添加事件知识" extractContent="false"
+            style="overflow: hidden;" extractContent="false" preventCache="false" preload="false"
+            refreshOnShow="false" doLayout="true" selected="false" closable="false">
+        </div>
+        <div data-dojo-type="dijit/layout/ContentPane" title="知识审核入库" extractContent="false"
+            style="overflow: hidden;" extractContent="false" preventCache="false" preload="false"
+            refreshOnShow="false" doLayout="true" selected="false" closable="false">
+        </div>
+    </span>
+</div>
+</body>
+</html>

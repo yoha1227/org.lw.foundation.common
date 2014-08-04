@@ -1,0 +1,89 @@
+/**
+ * 
+ */
+define([
+	"dojo/query",
+	"dijit/Dialog",
+	"dijit/form/Button",
+	"dojo/_base/lang",
+	"dojo/_base/config",
+	"dojo/_base/declare"
+	], function(query, Dialog, button, lang, config, declare){
+	
+    return declare("dojox3rd.widget.MessageBoxDialog", Dialog, {
+    	
+        _underlyingDialog : function(message, callback){
+        	
+            var controllerBox = '<div class="dijitDialogPaneActionBar" role="eventcontroller" style="text-align:center">'
+                +'</div>';
+            
+            this.set({
+                title : config.application.dialogTitle,
+                style : "width: 300px;",
+                content : message + controllerBox,
+                onHide : function(){
+                    text = "close"
+                    if (this.get("statusText")){
+                        text = this.get("statusText");
+                        this.set({"statusText" : null});
+                    }
+                    if (lang.isFunction(callback)) {
+                        callback( text );
+                    }
+                }
+            });
+        },
+        
+        alert : function(message, callback){
+            this._underlyingDialog(message, callback);
+            this.startup();
+            this.show();
+            
+            var _thisDialog = this;
+            
+            var tNode = query("div[role=eventcontroller]", this.domNode)[0];
+            var okbutton = new button({
+                label : "确定",
+                onClick : function(){
+                    _thisDialog.set({statusText : "ok"});
+                    _thisDialog.hide();
+                }
+            });
+            
+            okbutton.placeAt(tNode, "last").startup();
+        },
+        
+        prompt : function(message, callback){
+            this._underlyingDialog(message, callback);
+            this.startup();
+            this.show();
+            
+            var _thisDialog = this;
+            
+            var tNode = query("div[role=eventcontroller]", this.domNode)[0];
+            var okbutton = new button({
+                label : "确定",
+                onClick : function(){
+                    _thisDialog.set({statusText : "ok"});
+                    _thisDialog.hide();
+                }
+            });
+            
+            okbutton.placeAt(tNode, "last").startup();
+            
+            var okbutton = new button({
+                label : "取消",
+                onClick : function(){
+                    _thisDialog.set({statusText : "cancel"});
+                    _thisDialog.hide();
+                }
+            });
+            
+            okbutton.placeAt(tNode, "last").startup();
+        },
+        
+        confirm : function(){
+            
+        }
+    });
+})

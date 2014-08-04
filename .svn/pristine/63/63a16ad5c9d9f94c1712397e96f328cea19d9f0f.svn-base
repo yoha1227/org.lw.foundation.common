@@ -1,0 +1,168 @@
+define(["dojo/_base/declare", 
+        "dojo/request",
+        "dojo/json"
+        ], function(declare, request, json) {
+	
+	return declare(null, {
+		constructor: function(tgtBaseUrl, timeout) {
+			
+			this.serviceBaseUrl = tgtBaseUrl;
+	    	if (typeof timeout == "undefined") {
+	    		this.timeout = 2000;
+	    	} else {
+	    		this.timeout = timeout;	    		
+	    	}
+			
+			function RequestOptions () {
+				this.sync = true;
+				this.timeout = null;
+				this.data = null;
+				this.handleAs = "json";
+				this.headers = {
+						"Content-Type" : "application/json;charset=UTF-8",	//需要加上charset=UTF-8，否则java会报415错误
+						"Accept" : "application/json;charset=UTF-8"
+					};
+			}
+			
+		    this.newEntitySync = function (entity) {
+		    	var resultEntity = null;
+		    	
+		    	var options = new RequestOptions();
+		    	options.sync = true;
+		    	options.timeout = this.timeout;
+		    	options.data = json.stringify(entity);
+		    	
+	    		request.post(this.serviceBaseUrl, options).then(function(responseJson) {
+	            	resultEntity = responseJson;
+	            }, function(error) {
+	            	throw error;
+	            });	
+		    	
+		    	return resultEntity;
+		    };
+		    
+		    this.newEntity = function (entity) {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+		    	options.data = json.stringify(entity);
+		    	
+	    		return request.post(this.serviceBaseUrl, options);
+	    	};
+	    	
+		    this.updateEntitySync = function (entity) {
+		    	var resultEntity = null;
+		    	
+		    	var options = new RequestOptions();
+		    	options.sync = true;
+		    	options.timeout = this.timeout;
+		    	options.data = json.stringify(entity);
+		    			    	
+	    		request.put(this.serviceBaseUrl + entity.id, options).then(function(responseJson) {
+	            	resultEntity = responseJson;
+	            }, function(error) {
+	            	throw error;
+	            });	
+		    	
+		    	return resultEntity;
+		    };
+		    
+		    this.updateEntity = function (entity) {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+		    	options.data = json.stringify(entity);
+		    	
+	    		return request.put(this.serviceBaseUrl + entity.id, options);
+		    };
+		    
+		    this.deleteEntityByIdSync =  function (id) {		    	
+		    	var options = new RequestOptions();
+		    	options.sync = true;
+		    	options.timeout = this.timeout;
+
+	    		request.del(this.serviceBaseUrl + id, options).then(function(responseJson) {
+		            return responseJson;
+		        }, function(error) {
+		            throw error;
+		        });	
+		    };
+
+		    this.deleteEntityById =  function (id) {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+		    	
+		    	return request.del(this.serviceBaseUrl + id, options);	
+		    };
+		    
+		    this.getEntityByIdSync = function (id) {
+		    	var entity = null;
+		    	
+		    	var options = new RequestOptions();
+		    	options.sync = true;
+		    	options.timeout = this.timeout;
+
+		    	request.get(this.serviceBaseUrl + id, options).then(function(entityJson) {
+		            entity = entityJson;
+		        }, function(error) {
+		            throw error;
+		        });
+		    	
+		    	return entity;
+		    };
+		    
+		    this.getEntityById = function (id) {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+
+		    	return request.get(this.serviceBaseUrl + id, options);	
+		    };
+		    			    
+		    this.getDefaultEntitySync = function () {
+		    	var entity = null;
+		    	
+		    	var options = new RequestOptions();
+		    	options.sync = true;
+		    	options.timeout = this.timeout;
+
+	    		request.get(this.serviceBaseUrl + "default/", options).then(function(entityJson) {
+		            entity = entityJson;
+		        }, function(error) {
+			        throw error;
+			    });
+	    		
+		    	return entity;
+		    };
+		    
+			this.getDefaultEntity = function () {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+
+		    	return request.get(this.serviceBaseUrl + "default/", options);	
+		    };  	
+		    
+		    this.findAllEntitiesSync = function () {
+		    	var entities = null;
+		    	
+		    	var options = new RequestOptions();
+		    	options.sync = true;
+		    	options.timeout = this.timeout;
+
+	    		request.get(this.serviceBaseUrl + "all/", options).then(function(entitiesJson) {
+	    			entities = entitiesJson;
+		        }, function(error) {
+			        throw error;
+			    });
+	    		
+		    	return entities;
+		    };
+		    
+			this.findAllEntities = function () {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+
+		    	return request.get(this.serviceBaseUrl + "all/", options);
+		    };
+		    
+		}
+	  });
+
+});

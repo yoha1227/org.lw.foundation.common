@@ -1,0 +1,63 @@
+define([ 
+         "dojo/_base/array", 
+         "dojo/dom-construct", 
+         "dojo/topic" ],
+		function(array, domConstruct, topic) {
+			return {
+				/**
+				 * 获取URL的参数
+				 */
+				getUrlParams : function(url) {
+					if (!url) {
+						url = location.search; // 获取url中"?"符后的字串
+					}
+					
+					var theRequest = new Object();
+					if (url.indexOf("?") != -1) {
+						var str = url.substr(1);
+						strs = str.split("&");
+						for ( var i = 0; i < strs.length; i++) {
+							theRequest[strs[i].split("=")[0]] = unescape(strs[i].substr(strs[i]
+									.indexOf("=") + 1));
+						}
+					}
+					
+					return theRequest;
+				},
+				
+				parseUrl : function(url) {
+					var a = domConstruct.create("a", {
+						href : url,
+						style : "display:none"
+					});
+					
+					var parsedUrl = {
+						source : url,
+						protocol : a.protocol.replace(':', ''),
+						host : a.hostname,
+						port : a.port,
+						// query: a.search,
+						search : a.search, // GET参数
+						params : (function() { // 格式化后的GET参数
+							var ret = {}, seg = a.search.replace(/^\?/, '').split('&'), len = seg.length, i = 0, s;
+							for (; i < len; i++) {
+								if (!seg[i]) {
+									continue;
+								}
+								s = seg[i].split('=');
+								ret[s[0]] = s[1];
+							}
+							return ret;
+						})(),
+						file : (a.pathname.match(/\/([^\/?#]+)$/i) || [ , '' ])[1],
+						hash : a.hash.replace('#', ''), // 锚点
+						path : a.pathname.replace(/^([^\/])/, '/$1'),
+						relative : (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [ , '' ])[1],
+						segments : a.pathname.replace(/^\//, '').split('/')
+					};
+					
+					domConstruct.destroy(a);
+					return parsedUrl;
+				}
+			}
+		});

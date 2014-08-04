@@ -1,0 +1,3 @@
+[
+    {"name":"serviceStub", "module": "affairTest/testAffairEntryServiceStub"}
+]

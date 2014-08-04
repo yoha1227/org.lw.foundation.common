@@ -1,0 +1,26 @@
+define([
+    "dojo/_base/declare", 
+	"dijit/form/DateTextBox", 
+	"dojo/date/locale"
+], function(declare, DateTextBox, locale){
+	return declare(DateTextBox, {
+            serverFormat: {selector: 'date', datePattern: 'dd-MMM-yyyy', locale: 'en-us'},
+            value: "", // prevent parser from trying to convert to Date object
+            postMixInProperties: function(){ // change value string to Date object
+                this.inherited(arguments);
+                this.value = new Date(this.value);
+            },
+            
+            serialize: function(dateObject, options){
+                return dateObject.getTime();
+            },
+			
+			_setValueAttr: function(value, priorityChange, formattedValue){
+				var dateObject;
+				if ( !isNaN(value) && ( (dateObject = new Date(value) ) != new Date("").toString() ) ){
+					value = dateObject;
+				}
+				this.inherited("_setValueAttr", [value, priorityChange, formattedValue]);
+			}			
+        });
+})

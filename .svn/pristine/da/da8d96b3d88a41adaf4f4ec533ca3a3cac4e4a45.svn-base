@@ -1,0 +1,80 @@
+define([
+    "dojo/store/Memory",
+    "dijit/Tree", 
+    "dijit/tree/ObjectStoreModel",
+    "service_stub/itsmServiceEntryPoint",
+	"dojo/store/JsonRest",
+    "dojo/_base/lang",
+    "dojo/_base/declare",
+    "dojo/request"
+],function(Memory, Tree, ObjectStoreModel, itsmServiceEntryPoint, JsonRest, lang, declare, request){
+    var target = itsmServiceEntryPoint.getContextPath() + "/service/organization/organizationManager/toplevel/";
+	
+	var store = new JsonRest({target: target});
+	
+    // create model to interface Tree to store
+	/*
+    var store = new Memory({
+        data: [{
+            "id": "0",
+            "children": [],
+            "nameAbbr": "root"
+        }]
+    });
+    
+    store.getChildren = function(object){
+        return object.children;
+    }
+    
+    
+    var model = new ObjectStoreModel({
+        store: store,
+        
+        labelAttr: "nameAbbr",
+        
+        query: {id: 0}
+    });
+ */   
+    return declare(null);
+//    return declare(null, {
+////      model: model,
+//        treeArgs : null,
+//        treeId: null,
+//        tree: null,
+//        constructor: function(args, id){
+//            var self = this;
+//            this.treeArgs = args;
+//            this.treeId = id;
+//            request.get(target, {handleAs: "json"}).then(function(data){
+//                var store = new Memory({data: [data]});
+//                
+//                store.getChildren = function(object){
+//                    return object.children;
+//                }
+//                
+//                var model = new ObjectStoreModel({
+//                    store: store,
+//                    labelAttr: "nameAbbr",
+//                    query: {id: 0},
+//                    mayHaveChildren: function(object){
+//                        return object.children.length > 0;
+//                    }
+//                });
+//                model.store = store;
+//                self.treeArgs.model = model;
+//                self.treeArgs.showRoot = false;
+//                self.tree = new Tree(self.treeArgs, self.treeId);
+//                if (self._started){
+//                    self.tree.startup();
+//                }
+//            })
+//        },
+//        startup: function(){
+//            if(this.tree){
+//                this.tree.startup();
+//            }           
+//            this._started = true;
+//        }
+//    });
+    
+});

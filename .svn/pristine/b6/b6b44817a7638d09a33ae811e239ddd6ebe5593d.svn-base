@@ -1,0 +1,11 @@
+<div class="OperationHistoryGrid ${class}">
+	<div>
+		<fieldset
+                style="border: 2px groove threedface; margin: 2px; padding: 0.75em;">
+                <legend>处理历史</legend>
+		<!-- <div data-dojo-attach-point="currentStateNode" style="float:left; width: 100px;">&nbsp;</div>-->
+	    <div data-dojo-type="dgrid/OnDemandGrid" data-dojo-attach-point="gridWidgetNode" style=" width: 100%;"></div>
+		</fieldset>
+	</div>
+</div>
+	

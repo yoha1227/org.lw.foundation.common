@@ -1,0 +1,336 @@
+/**
+ * 工作空间（基于iframe的独立区域）基类
+ */
+define([ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			// should import follow module otherwise will thrown "dijit.byid error"
+			"dijit/_base/manager",
+			"dojo/text!./templates/WorkspaceIframe.html",
+			// import modules will be inherited by our widget:
+			// import modules used by our widget:
+	        "dojo/dom", 
+	        "dojo/dom-attr",
+	        "dojo/dom-construct",
+	     	"dojo/_base/config",
+			"dijit/registry",
+	        "dojo/query",
+	        "dojo/_base/lang", 
+	        "dojo/_base/array",
+	        "dojo/_base/Deferred",
+	        "dojo/request",
+	        "dojo/topic",
+			"dojox3rd/mvc/mvcUtils",
+	    	"dojox3rd/utils/urlParsers",
+			"dojox3rd/sys/modelSingleton", 
+			"dojox3rd/sys/topicSingleton"
+		], function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, manager, 
+				templateStr, dom, domAttr, domConstruct, config, registry, query, lang, array, Deferred, request, topic, 
+				mvcUtils, urlParsers, modelSingleton, topicSingleton ) {
+	
+/**	
+ * 	Structure of workspaceIframe:
+		1> one global workspace pane for all clildren space
+		2> list of iframe space:
+		- iframe directly embedded in worksapce pane
+		- maybe in tab page embedded in global pane if workingUi has parent workingUi
+		3> XPaths
+		- functionXPath: xpath from application root to function startup point (module directory/function name)
+		- functionParams: parameters pass through to function startup code
+
+		- uiEntryXPath: xpath from application root to Ui Entry html file
+		- uiViewXPath: xpath from Ui Entry to Ui View loader file (mainView.html)
+
+		workspaceRegister sample:
+			{
+			   "id": 1001,
+			   "uiType": "uiEntry",
+		 	   "title": "系统管理",
+		 	   "disabled": false,
+		 	   "uiEntryXPath": "/sys_mngt/mainView.html",
+		 	   "uiViewXPath": "../mainView.html",
+		 	   "functionXPath": "/sys_mngt",
+		 	   "locationPrompt": "/系统管理"
+		 	},
+		    {
+			   "id": 2001,
+			   "uiType": "uiView",
+		 	   "title": "用户账户管理",
+		 	   "disabled": false,
+		 	   "uiEntryXPath": "/sys_mngt/mainView.html",
+		 	   "uiViewXPath": "../useraccount/mainView.html",
+		 	   "functionXPath": "/sys_mngt/useraccount",
+			   "locationPrompt": "/系统管理/用户账户管理"
+		 	},
+**/	    	
+	
+		return dojo.declare("dojox3rd.widget_template.WorkspaceIframe",
+					[ _WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin
+							// the modules will be inherited by our widget:
+							], {
+						// Path to the template
+						templateString : templateStr,
+						
+						//define our attribute variables here:
+						targetWorkspaceWidget : null,
+
+						workspaceRegister : null,
+
+						_currentWorkspaceIframe : null,
+						_workspaceIframeCacheMap : {},
+
+				        _functionXPathMap : {},
+				        _uiEntryXPathMap : {},
+				        _uiViewXPathMap : {},
+				        
+				        _selectedUiEntry : null,
+				        _selectedUiView : null,
+				        _currentFunctionName : null,
+				        _currentFunctionParam : null,
+												
+				        _setWorkspaceRegisterAttr : function(/*Object*/ workspaceRegister){
+				        	this._set("workspaceRegister", workspaceRegister);
+				        },
+			
+				        // occur from internal event, tab page in workspace has changed (by click tab)
+				        _viewItemSelectedHasChanged: function(uiViewItem) {
+				        	
+        					if (this._selectedUiView != uiViewItem) {
+        						this._selectedUiView = uiViewItem;
+        					
+        						modelSingleton.getModelById("menuModel").set("functionXPathWithName", { 
+        									functionXPath: this._selectedUiView.functionXPath, 
+    										functionName: this._selectedUiView.defaultFunctionName});
+        						
+        						var functionXPathAsArray = urlParsers.parseUrl(this._selectedUiView.functionXPath);
+        						modelSingleton.getModelById("layout").set("locationPrompt", functionXPathAsArray.segments);
+        					}
+				        },
+				        
+				        // occur from external event, such as menu click/task select/entity select
+        				changeViewItemSelected : function(uiViewItem) {
+        					
+        					if (this._selectedUiView != uiViewItem) {
+        						
+            					var targetUiEntry = this._uiEntryXPathMap[uiViewItem.uiEntryXPath];
+            					if (this._selectedUiEntry != targetUiEntry) {          						
+            						this._loadFromUiEntry(targetUiEntry, uiViewItem);
+            						
+               						this._selectedUiEntry = targetUiEntry;
+            					} else {
+            						
+            						this._loadOrSwitchToUiView(uiViewItem);
+            					}
+            					
+            					this._selectedUiView = uiViewItem;
+            					
+        						var functionXPathAsArray = urlParsers.parseUrl(this._selectedUiView.functionXPath);
+        						modelSingleton.getModelById("layout").set("locationPrompt", functionXPathAsArray.segments);
+        					}
+        				},
+        				
+        				changeFunctionParams : function(functionParams) {
+        					
+        					if ((this._currentFunctionName != functionParams.functionName) || 
+        							(this._currentFunctionParam != functionParams.functionParam)) {
+        						this._currentFunctionName = functionParams.functionName;
+        						this._currentFunctionParam = functionParams.functionParam;
+        						
+        						this._publishParamsToUiView();
+        					}
+        				},
+        				
+						_loadFromUiEntry : function(targetUiEntry, uiViewItem) {
+							if ((this._selectedUiEntry != null) && (this._currentWorkspaceIframe != null))
+								this._workspaceIframeCacheMap[targetUiEntry.uiEntryXPath] = this._currentWorkspaceIframe;
+							
+    						var tagertWorkspaceIframe = this._buildIframeFor(targetUiEntry);
+							
+    						modelSingleton.getModelById(tagertWorkspaceIframe.id).set("uiViewXPath", uiViewItem.uiViewXPath);
+
+							domConstruct.empty(this.domNode);
+							
+							this._currentWorkspaceIframe = domConstruct.place(tagertWorkspaceIframe, this.domNode);
+						},
+
+        				_buildIframeFor : function(targetUiEntry) {
+        					var targetIframe = domConstruct.create("iframe", {
+        	                    id: "workspaceIframe-" + targetUiEntry.id,
+        	                    src: config.appContextPath + targetUiEntry.uiEntryXPath,
+        	                    width: "100%",
+        	                    height: "100%"
+        	                });
+        					
+        					return targetIframe;
+						},
+
+						_loadOrSwitchToUiView : function(uiViewItem) {
+        							
+    						modelSingleton.getModelById(this._currentWorkspaceIframe.id).set("uiViewXPath", uiViewItem.uiViewXPath);
+
+   						},
+   						
+   						_publishParamsToUiView : function() {
+    						var targetFunctionParams = { functionName: this._currentFunctionName,
+    								functionParam: this._currentFunctionParam };
+  							
+   							topicSingleton.getTopicById("workspaceModel").publish("functionParams", 
+   									"function Params pushed", { functionParams : targetFunctionParams });
+							
+   						},
+   						
+						_workspaceRegister : function(workspaceRegisterInfo) {
+							// "this" pointer maybe changed to html not this widget after registry.byid called 
+							var _thisWidget = this;
+														
+							array.forEach(workspaceRegisterInfo, function(workspaceInfo) {
+								
+								switch(workspaceInfo.uiType) {
+								case "uiEntry":
+						        	var uiEntryItem = {
+											id:                 workspaceInfo.id,
+											uiType:             workspaceInfo.uiType,
+											title:              workspaceInfo.title,
+											disabled:           workspaceInfo.disabled,
+											uiEntryXPath:       workspaceInfo.uiEntryXPath
+										};
+						        	
+						        	_thisWidget._uiEntryXPathMap[uiEntryItem.uiEntryXPath] = uiEntryItem;
+						        	
+									break;
+								case "uiView":
+						        	var uiViewItem = {
+											id:                 workspaceInfo.id,
+											uiType:             workspaceInfo.uiType,
+											title:              workspaceInfo.title,
+											disabled:           workspaceInfo.disabled,
+											uiEntryXPath:       workspaceInfo.uiEntryXPath,
+											uiViewXPath:        workspaceInfo.uiViewXPath,
+											functionXPath:      workspaceInfo.functionXPath,
+											defaultFunctionName:workspaceInfo.defaultFunctionName,
+											locationPrompt:     workspaceInfo.locationPrompt
+										};
+						        	
+						        	_thisWidget._uiViewXPathMap[uiViewItem.uiViewXPath] = uiViewItem;
+						        	_thisWidget._functionXPathMap[uiViewItem.functionXPath] = uiViewItem;
+						        	
+						        	if (_thisWidget._uiEntryXPathMap[uiViewItem.uiEntryXPath] == null) {
+							        	var uiEntryItem = {
+												id:                 workspaceInfo.id,
+												uiType:             workspaceInfo.uiType,
+												title:              workspaceInfo.title,
+												disabled:           workspaceInfo.disabled,
+												uiEntryXPath:       workspaceInfo.uiEntryXPath
+											};
+							        	
+							        	_thisWidget._uiEntryXPathMap[uiEntryItem.uiEntryXPath] = uiEntryItem;
+						        		
+						        	}
+									break;
+								default:
+									throw new Error("not supported uiType !");
+								}
+							});
+
+   						},
+   						
+				        // Override this method to perform custom behavior during dijit construction.
+						// Common operations for constructor:
+						// 1) Initialize non-primitive types (i.e. objects and arrays)
+						// 2) Add additional properties needed by succeeding lifecycle methods
+						constructor : function() {
+							
+						},
+
+						// When this method is called, all variables inherited from superclasses are 'mixed in'.
+						// Common operations for postMixInProperties
+						// 1) Modify or assign values for widget property variables defined in the template HTML file
+						postMixInProperties : function() {
+							this.inherited(arguments);
+						},
+
+						// postCreate() is called after buildRendering().  This is useful to override when 
+						// you need to access and/or manipulate DOM nodes included with your widget.
+						// DOM nodes and widgets with the dojoAttachPoint attribute specified can now be directly
+						// accessed as fields on "this". 
+						// Common operations for postCreate
+						// 1) Access and manipulate DOM nodes created in buildRendering()
+						// 2) Add new DOM nodes or widgets 
+						postCreate : function() {
+//							this.inherited(arguments);							
+							
+							// "this" pointer maybe changed to html not this widget after registry.byid called 
+							var _thisWidget = this;
+							
+							var iframeNode = mvcUtils.findFirstNodeWithNodeName("IFRAME", _thisWidget.domNode);
+							
+							_thisWidget.targetWorkspaceWidget = registry.byId(domAttr.get(iframeNode, "widgetid"));
+							
+							_thisWidget._currentWorkspaceIframe = _thisWidget.targetWorkspaceWidget;
+							
+							// load default entity value from json
+							request.get(_thisWidget.workspaceRegister, {
+								sync : true,
+								timeout : 2000,
+								handleAs : "json"
+							}).then(function(workspaceRegisterJson) {
+								var workspaceRegisterInfo = workspaceRegisterJson;
+								
+								_thisWidget._workspaceRegister(workspaceRegisterInfo);
+								
+								var syncWorkspaceModel = null;
+								
+								modelSingleton.getModelById("workspaceModel").watch("functionXPath", function(name, oldValue, value){
+				        			if (name == "functionXPath") {
+				        				syncWorkspaceModel = new Deferred();
+				        				
+				        				var functionXPath = value;
+				        				var uiViewItem = _thisWidget._functionXPathMap[functionXPath];
+				        				
+				        				_thisWidget.changeViewItemSelected(uiViewItem);
+				        				
+				        				syncWorkspaceModel.resolve("finish the iframe!");
+				        			}
+				 					console.log(name, oldValue, value);
+								});
+								
+								modelSingleton.getModelById("workspaceModel").watch("functionParams", function(name, oldValue, value){
+				        			if (name == "functionParams") {
+				        				var functionParams = value;
+				        				
+				        				if (syncWorkspaceModel != null) {
+				        					syncWorkspaceModel.then(function(){
+				        						
+						        				_thisWidget.changeFunctionParams(functionParams);
+						        				syncWorkspaceModel = null;
+				        					});
+				        				} else
+				        					_thisWidget.changeFunctionParams(functionParams);
+				        			}
+				 					console.log(name, oldValue, value);
+								});
+								
+								modelSingleton.getModelById("workspaceModel").watch("uiViewXPath", function(name, oldValue, value){
+				        			if (name == "uiViewXPath") {
+				        				var uiViewXPath = value;
+				        				var uiViewItem = _thisWidget._uiViewXPathMap[uiViewXPath];
+				        				
+								        // occur from embedded iframe event, tab page in workspace has changed (by click tab)
+				        				_thisWidget._viewItemSelectedHasChanged(uiViewItem);
+				        			}
+				 					console.log(name, oldValue, value);
+								});
+								
+								var currentFunctionXPath = modelSingleton.getModelById("workspaceModel").get("functionXPath");
+								if ((typeof currentFunctionXPath != "undefined") && (currentFunctionXPath != null)) {
+									var currentUiViewItem =  _thisWidget._functionXPathMap[currentFunctionXPath];
+			        				
+			        				_thisWidget.changeViewItemSelected(currentUiViewItem);
+								}
+							});
+							
+						}
+						
+					});
+		});

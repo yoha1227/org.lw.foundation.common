@@ -1,0 +1,108 @@
+require([
+		"dijit/registry",
+		"dojo/on",
+		"dojo/dom",
+		"dojo/dom-attr",
+		"dojo/Stateful",
+		"dojo/request",
+		"affairService/affairEntryDaoStub",
+		"dojox3rd/mvc/mvcUtils",
+		"dojo/store/Memory",
+		"dojo/dom-geometry",
+		"dojo/json",
+		"dojo/ready", 
+		"dojo/when", 
+		"dojo/parser" ],
+	function(registry, on, dom, domAttr, Stateful, request,
+				affairEntryDao, mvcUtils, Memory, domGeometry, json, ready, when, parser) {
+			
+		var viewScopePrefix = "knownledge_mngt";
+		
+		var affairEntryForm;
+		var affairEntryDetailForm;
+		var customerInfoViewer;
+
+		// load default entity value from server
+		affairEntryDao.getDefaultEntity().then(function(response){
+			
+			// variables from global
+			defaultAffairEntry = response;
+			
+//			console.log(response);
+//			return;
+			
+			defaultAffairEntryDetail = defaultAffairEntry.affairEntryDetail;
+			defaultCustomerInfo =  defaultAffairEntry.associatedCustomer;
+			operateHistoryStore = new Memory({data: [], idProperty: "operateStep"});
+				
+			defaultAffairEntry.affairEntryDetail = null;
+			defaultAffairEntry.assistUsers = null;
+			defaultAffairEntry.associatedCustomer = null;
+			defaultAffairEntry.responseUser = null;
+//			defaultAffairEntry.knowledgeFromAffairs = {};
+
+			return parser.parse({
+				rootNode: viewScopePrefix + "-" + "RootNode"
+				});
+		}).then(function() {
+			setTimeout(function(){
+			// mvc/View: get views with model and controller
+			affairEntryForm = registry.byId(viewScopePrefix + "-" + "affairEntryForm");
+			affairEntryDetailForm = registry.byId(viewScopePrefix + "-" + "affairEntryDetailForm");
+			customerInfoViewer = registry.byId(viewScopePrefix + "-" + "customerInfoViewer");
+			affairOperateHistoryPane = registry.byId(viewScopePrefix + "-" + "affairOperateHistoryPane");
+			
+			// mvc/Event: submit the data to server
+			on(dom.byId(viewScopePrefix + "-" + "submitBtn"), "click", function() {
+				var affairEntry = affairEntryForm.submitToEntity();
+				var affairEntryDetail = affairEntryDetailForm.submitToEntity();
+
+				//for new entity at server, id should set null
+				affairEntry.id = null;
+				affairEntryDetail.id = null;
+				for (var item in affairEntry.knowledgeFromAffairs) {
+					affairEntry.knowledgeFromAffairs[item].id = null;						
+				}
+					
+				affairEntry.affairEntryDetail = affairEntryDetail;
+					
+				affairEntryDao.newEntity(affairEntry).then(function(response){
+					
+					alert("提交成功!");
+				}, function(err) {
+					
+					alert("提交错误:" + err);
+				});
+			});
+				
+			// mvc/Event: rebase new data to form
+			on(dom.byId(viewScopePrefix + "-" + "rebaseBtn"), "click", function() {			
+				affairEntryForm.rebaseFromEntity(defaultAffairEntry);
+				affairEntryDetailForm.rebaseFromEntity(defaultAffairEntryDetail);
+			});
+            
+			// mvc/Event: reset the data in form to default
+			on(dom.byId(viewScopePrefix + "-" + "cleanBtn"), "click", function() {
+				affairEntryForm.clean();
+				affairEntryDetailForm.clean();
+			});
+
+			// mvc/Event: revert the original data to model and them to form
+			on(dom.byId(viewScopePrefix + "-" + "undoBtn"), "click", function() {
+				affairEntryForm.undo();
+				affairEntryDetailForm.undo();
+			});
+							
+			// mvc/Event: restore the new data to model and them to form
+			on(dom.byId(viewScopePrefix + "-" + "redoBtn"), "click", function() {
+				affairEntryForm.redo();
+				affairEntryDetailForm.redo();
+			});
+			
+			var customerSize = domGeometry.getContentBox(customerInfoViewer.tableNode);
+            domGeometry.setContentSize( affairOperateHistoryPane.gridWidgetNode.domNode, {h: customerSize.h} );             
+          }, 100);
+							
+		});
+		
+});

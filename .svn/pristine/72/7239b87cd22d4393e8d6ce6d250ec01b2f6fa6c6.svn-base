@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>test party tree UI</title>
+
+<style>
+    @import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/document.css";
+    @import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css";
+</style>
+
+<script type="text/javascript">
+	var myModel = null;
+	
+    require([
+		"dojo/parser",
+		"dijit/registry",
+		"dojo/store/Memory", 
+		"dijit/tree/ObjectStoreModel",
+		"dijit/Tree",
+		"affairService/partyMangerStub",
+		"dojo/json",
+		"dijit/form/Button",
+		"dojo/domReady!" 
+    ], function(parser, registry, Memory, ObjectStoreModel, Tree, partyMangerStub, json){
+    	
+        // Create test store, adding the getChildren() method required by ObjectStoreModel
+        var myStore = new Memory({
+            data: [
+                { id: 'world', name:'The earth', type:'planet', population: '6 billion'},
+                { id: 'AF', name:'Africa', type:'continent', population:'900 million', area: '30,221,532 sq km',
+                        timezone: '-1 UTC to +4 UTC', parent: 'world'},
+                    { id: 'EG', name:'Egypt', type:'country', parent: 'AF' },
+                    { id: 'KE', name:'Kenya', type:'country', parent: 'AF' },
+                        { id: 'Nairobi', name:'Nairobi', type:'city', parent: 'KE' },
+                        { id: 'Mombasa', name:'Mombasa', type:'city', parent: 'KE' },
+                    { id: 'SD', name:'Sudan', type:'country', parent: 'AF' },
+                        { id: 'Khartoum', name:'Khartoum', type:'city', parent: 'SD' },
+                { id: 'AS', name:'Asia', type:'continent', parent: 'world' },
+                    { id: 'CN', name:'China', type:'country', parent: 'AS' },
+                    { id: 'IN', name:'India', type:'country', parent: 'AS' },
+                    { id: 'RU', name:'Russia', type:'country', parent: 'AS' },
+                    { id: 'MN', name:'Mongolia', type:'country', parent: 'AS' },
+                { id: 'OC', name:'Oceania', type:'continent', population:'21 million', parent: 'world'},
+                { id: 'EU', name:'Europe', type:'continent', parent: 'world' },
+                    { id: 'DE', name:'Germany', type:'country', parent: 'EU' },
+                    { id: 'FR', name:'France', type:'country', parent: 'EU' },
+                    { id: 'ES', name:'Spain', type:'country', parent: 'EU' },
+                    { id: 'IT', name:'Italy', type:'country', parent: 'EU' },
+                { id: 'NA', name:'North America', type:'continent', parent: 'world' },
+                { id: 'SA', name:'South America', type:'continent', parent: 'world' }
+            ],
+            getChildren: function(object){
+                return this.query({parent: object.id});
+            }
+        });
+
+        // Create the model
+        myModel = new ObjectStoreModel({
+            store: myStore,
+            query: {id: 'world'}
+        });
+
+    	parser.parse().then(function(){
+			var myTree = registry.byId("myTree");
+			console.log(myTree);
+			
+			myTree.startup();
+
+		});
+		
+	});
+</script>
+
+
+</head>
+<body class="claro">
+
+	<!-- Create the tree -->
+	<div data-dojo-type="dijit/Tree" id="myTree" data-dojo-props="model: myModel"></div>
+	
+    <div data-dojo-type="dijit/form/Button">
+    </div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+define([
+        "dojo/_base/declare", 
+        "dojo/_base/lang", 
+        "dojo/request",
+        "dojo/store/JsonRest", 
+        "dojo/store/Memory", 
+        "dojo/store/Cache",
+		"dojo/store/Observable", 
+		"dojo/Stateful",
+		"dojo/json"
+		], function(declare, lang, request, JsonRest, Memory, Cache, Observable, Stateful, json) {
+	
+	return declare(null, {
+		constructor: function(tgtBaseUrl, timeout){
+			this.serviceBaseUrl = tgtBaseUrl;
+	    	if (typeof timeout == "undefined") {
+	    		this.timeout = 2000;
+	    	} else {
+	    		this.timeout = timeout;	    		
+	    	}
+			
+	    	this.headers = {
+					"Content-Type" : "application/json;charset=UTF-8"
+				};
+	    	this.accepts = "application/json;charset=UTF-8";
+	    	this.sortParam = "sortBy";
+	    	this.idProperty = "id";
+	    	
+	    	this.restfulStubStore = new JsonRest({
+	    			headers: this.headers,
+	    		    target: this.serviceBaseUrl,
+	    		    idProperty: this.idProperty,
+	    		    sortParam: this.sortParam,
+	    		    accepts: this.accepts
+	    		  });
+	    	  
+			function QueryOptions () {
+				this.start = 0;
+				this.count = 25;
+				this.sort = [];
+			}
+			
+			function PutOptions () {
+//				this.id = null;
+				this.before = null;
+				this.parent = null;
+				this.overwrite = true;
+			}
+			
+			function AddOptions () {
+				this.before = null;
+				this.parent = null;
+			}
+			
+			function RequestOptions () {
+				this.sync = false;
+				this.timeout = null;
+				this.data = null;
+				this.handleAs = "json";
+				this.headers = constructor.headers;
+			}
+			
+		    this.newEntity = function (entity) {
+		    	var options = new AddOptions();
+		    	
+		    	//make sure that entity has been not with a id attribute
+		    	//if not, add() will use "PUT" http method 
+		    	var id = this.restfulStubStore.getIdentity(entity);
+		    	if (typeof id != "undefined") {
+		    		delete entity.id;
+		    	}
+	    		return this.restfulStubStore.add(entity, options);
+	    	};
+	    	
+		    this.updateEntity = function (entity) {
+		    	var options = new PutOptions();
+
+	    		return this.restfulStubStore.put(entity, options);
+		    };
+		    
+		    this.deleteEntityById =  function (id) {
+		    	
+	    		return this.restfulStubStore.remove(id);
+		    };
+		    
+		    this.getEntityById = function (id) {
+		    	
+	    		return this.restfulStubStore.get(id);
+		    };
+		    
+			this.getDefaultEntity = function () {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+
+		    	return request.get(this.serviceBaseUrl + "default/", options);
+		    };
+		    
+			this.findAllEntities = function () {
+		    	var options = new RequestOptions();
+		    	options.sync = false;
+
+		    	return request.get(this.serviceBaseUrl + "all/", options);
+		    };
+		    
+		    this.findEntitiesByQuery = function(targetQuery, queryOptions) {
+		    	var options;
+		    	var query;
+		    	
+		    	if (typeof queryOptions != "undefined") {
+		    		options = queryOptions;
+		    	} else {
+		    		options = new QueryOptions();
+			    	options.sort.push({ attribute: "id", descending: false });
+		    	}
+		    	
+		    	if (typeof targetQuery != "undefined") {
+		    		query = targetQuery;
+		    	} else {
+		    		query = {};
+		    	}
+		    	
+	    		return this.restfulStubStore.query(query, options);
+		    };
+		    
+		    this.findEntitiesInPageByProperties = function(queryProperties) {
+	    		//to be implemented
+		    };
+		    
+		}
+	  });
+
+});

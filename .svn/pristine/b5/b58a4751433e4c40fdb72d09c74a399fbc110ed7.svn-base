@@ -1,0 +1,317 @@
+require([ "dojox3rd/restfulstub/CrudableRestfulStubAsStore", "dijit/dijit",
+		"dojo/parser", "dojo/dom", "dojox/io/xhrScriptPlugin",
+
+		"dojo/data/ItemFileWriteStore", "dgrid/OnDemandGrid",
+		"dgrid/extensions/Pagination",
+		"affairService/affairSummaryDtoStubAsStore", "dojo/date/locale",
+		"dgrid/Selection", "dgrid/editor", "dojo/store/Observable","dojo/store/Memory",
+
+		"dijit/Toolbar", "dijit/ToolbarSeparator", "dijit/form/Button",
+		"dijit/form/ComboBox", "dojox/grid/_CheckBoxSelector",
+		"dojox/grid/cells", 'dojo/date/stamp', 'dojo/date/locale',
+		"dojo/window", "dijit/Dialog", "dijit/form/TextBox",
+		"dijit/form/Button", "dijit/form/Form", "dojo/_base/array",
+		"dijit/form/CheckBox" ], function(CrudableRestfulStubAsStore, dijit,
+		parser, dom, xhrScriptPlugin, ItemFileWriteStore, OnDemandGrid,
+		Pagination, affairSummaryDtoStubAsStore, dateLocal, Selection, editor,
+		Observable,Memory) {
+	parser.parse(this).then(
+			function() {
+				function dateTimeFormatter(item, value, node) {
+					if (value) {
+						node.innerHTML = dateLocal.format(new Date(value), {
+							datePattern : "yyyy-MM-dd",
+							timePattern : "HH:mm:ss"
+						});
+					}
+				}
+
+				var grid;
+				var gridStore;
+				// gridStore = new CrudableRestfulStubAsStore(
+				// "/dmpServer/resteasy/matUnit", 2000).getMvcStore();
+
+				// gridStore=Observable(new Store({ idProperty: "summary" }));
+
+				// gridStore=Observable(new Store({ idProperty: "summary" }));
+				gridStore = Observable(Memory({
+					data : [ {
+						selected : true,
+						id : 3
+					}, {
+						selected : false,
+						id : 4
+					} ]
+				}));
+
+				var createTaskStore = function() {
+					var tasks = [ {
+						id : "a921b5e2-4937-46fa-bcd3-695f67e00028",
+						description : "Task One",
+						status : "pending",
+						selected : false
+					}, {
+						id : "b3ed9491-1eb4-4f54-b9e8-e69bf892399e",
+						description : "Task Two",
+						status : "pending",
+						selected : false
+					}, {
+						id : "4a8c3707-0649-42f6-ba11-53976485320f",
+						description : "Task Three",
+						status : "pending",
+						selected : false
+					}, {
+						id : "21983be2-0c8c-490b-a7bb-48354af2afbf",
+						description : "Task Four",
+						status : "pending",
+						selected : true
+					} ];
+					var taskStore = new ({
+						data : tasks,
+						idProperty : "id"
+					});
+					return taskStore;
+				}
+
+				var structure = {
+					selected : editor({
+						label : " ",
+						autoSave : false,
+						sortable : false
+					}, "checkbox"),
+					id : {
+						field : 'id',
+						label : 'id'
+					// 禁止排序
+					}
+				};
+//				 structure=[{
+//				 field: "description",
+//				 label: "Description"
+//				 }]
+
+				grid = new (dojo.declare([ OnDemandGrid, Pagination, Selection,
+						editor ]))({
+					selectionMode : "extended",// 设置为只能单行选择
+					store : gridStore, // 数据集
+					columns : structure,				// 列
+
+				 pagingLinks : true, //
+				 pagingTextBox : true, //
+				 firstLastArrows : false, //
+				
+				 pageSizeOptions : [ 20, 30, 50, 100, 200 ],
+				 // height: 'auto',
+				 rowsPerPage : 20,
+				 //query:{ "id": 9 }, //筛选数据
+				 sort : "id" // 默认排序
+
+				}, dom.byId("MainGrid"));
+
+				// grid.styleColumn("selected", "width:30px");
+				grid.styleColumn("id", "width:60px");
+				// grid.styleColumn("assitenCode", "width:60px");
+				// grid.styleColumn("unitName", "width:200px");
+				// grid.styleColumn("linkMan", "width:60px");
+
+				// grid.set("sort", "id", "asc");// 默认排序
+				// grid.query = { "id": 9 };
+
+				grid.startup();
+
+				// 绑定工具栏方法
+				dojo.connect(dijit.byId("btnAdd"), "onClick", function(event) {
+					myDialog.show();
+				});
+
+				dojo.connect(dijit.byId("btnCheckSureTrue"), "onClick",
+						function(event) {
+							var bFlag = false;
+
+							gridStore.query({
+								selected : true
+							}).forEach(function(item) {
+
+								alert(item);
+								bFlag = true;
+
+							});
+
+							// for (var i in grid.selection) {
+							// var row = grid.row(i).data;
+							// row.chk_sure = 1;
+							// UpdateCheckSure(grid, "1", row);
+							//
+							// bFlag = true;
+							// }
+
+							if (bFlag == false) {
+								alert("请选择行");
+
+							} else {
+								// alert("审核成功");
+								grid.refresh();
+							}
+
+						});
+
+				dojo.connect(dijit.byId("btnCheckSureFalse"), "onClick",
+						function(event) {
+							var bFlag = false;
+							for ( var i in grid.selection) {
+								var row = grid.row(i).data;
+								row.chk_sure = 0;
+								myForm.setValues(row);
+								UpdateCheckSure(grid, "0", row);
+
+								bFlag = true;
+							}
+
+							if (bFlag == false) {
+								alert("请选择行");
+
+							} else {
+								// alert("审核成功");
+								grid.refresh();
+							}
+
+						});
+				dojo.connect(dijit.byId("btnReflash"), "onClick", function(
+						event) {
+					var strQuery = {};
+					var chk_sure = dijit.byId("cmbchk_sure").get('value');
+					if (chk_sure == '已审核') {
+						strQuery = {
+							"chk_sure" : 1
+						};
+					} else if (chk_sure == '未审核') {
+						strQuery = {
+							"chk_sure" : 0
+						};
+					}
+					grid.query = strQuery;
+					grid.refresh();
+				});
+
+				dojo.connect(dijit.byId("btnModifySubmnit"), "onClick",
+						function(event) {
+							UpdateRecord(grid);
+						});
+
+				grid.on(".dgrid-row:dblclick", function(evt) {
+					var row = grid.row(evt);
+
+					item = row.data;
+					myForm.setValues(item);
+					myDialog.show();
+				});
+
+				dojo.connect(dijit.byId("btnDel"), "onClick", function(event) {
+
+					var deleteFlag = false;
+					for ( var i in grid.selection) {
+						var row = grid.row(i).data;
+						DelRecord(row);
+						deleteFlag = true;
+					}
+
+					if (deleteFlag == false) {
+						alert("请选择行");
+
+					} else {
+						alert("删除成功");
+						grid.refresh();
+					}
+				});
+
+			});
+});
+
+// 保存，更新
+function UpdateCheckSure(grid, check_sure, record) {
+	var data = {
+		"chk_sure" : check_sure,
+		"id" : record.id
+	};
+
+	// var data = myForm.getValues();
+	var xhrArgs = {
+		url : "/dmpServer/resteasy/matUnit/UpdateChkSure/",
+		contentType : 'application/json;charset=UTF-8',
+		putData : dojo.toJson(data, true),
+		handleAs : "json",
+		load : function(response) {
+			alert("恭喜您，保存成功!");
+			// gridStore.newItem(record);
+			myDialog.onCancel();
+		},
+		error : function(error) {
+			alert("保存失败，请您重试!");
+		}
+	};
+
+	var deferred = dojo.xhrPut(xhrArgs);
+	grid.refresh();
+};
+
+// 保存，更新
+function UpdateRecord(grid) {
+	var record = myForm.getValues();
+
+	if (record.id != '') {// 更新
+		var xhrArgs = {
+			url : "/dmpServer/resteasy/matUnit/" + record.id,
+			contentType : 'application/json;charset=UTF-8',
+			putData : dojo.toJson(record, true),
+			handleAs : "json",
+			load : function(data) {
+				alert("恭喜您，保存成功!");
+				// gridStore.newItem(record);
+				myDialog.onCancel();
+			},
+			error : function(error) {
+				alert("保存失败，请您重试!");
+			}
+		};
+
+		var deferred = dojo.xhrPut(xhrArgs);
+	} else {// 新增
+		var xhrArgs = {
+			url : "/dmpServer/resteasy/matUnit/",
+			putData : dojo.toJson(record, true),
+			contentType : 'application/json;charset=UTF-8',
+			handleAs : "json",
+			load : function(data) {
+				alert("恭喜您，保存成功!");
+				// gridStore.newItem(record);
+				myDialog.onCancel();
+			},
+			error : function(error) {
+				alert("保存失败，请您重试!");
+			}
+		};
+
+		var deferred = dojo.xhrPost(xhrArgs);
+
+	}
+	grid.refresh();
+};
+
+// 删除
+function DelRecord(record) {
+	var xhrArgs = {
+		url : "/dmpServer/resteasy/matUnit/" + record.id,
+		contentType : 'application/json;charset=UTF-8',
+		handleAs : "json",
+		load : function(data) {
+
+		},
+		error : function(error) {
+			alert("删除失败，请您重试!");
+		}
+	};
+	// dojo.byId("response2").innerHTML =
+	// "Message being sent..."
+	// Call the asynchronous xhrPost
+	var deferred = dojo.xhrDelete(xhrArgs);
+};

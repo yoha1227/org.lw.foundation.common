@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>施工单位管理</title>
+
+<style type="text/css">
+@import
+	"http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css"
+	;
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojotoolkit/dojo/resources/dojo.css"
+	;
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/dgrid.css";
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/skins/claro.css"
+	;
+</style>
+
+<style type="text/css">
+html,body {
+	width: 100%;
+	height: 100%;
+}
+</style>
+</head>
+<body class="claro">
+	<table border=0 cellspacing=0 cellpadding=0
+		style="height: 100%; width: 100%;">
+		<tr>
+			<td>
+				<div data-dojo-type="dojo/store/Memory" data-dojo-id="chk_sureStore"
+					data-dojo-props="data: [{id: '-1', name: '全部'}, {id: '0', name: '未审核'}, {id: '1', name: '已审核'}]"></div>
+				<span data-dojo-type="dijit.Toolbar"> <input type="button"
+					id="btnAdd" data-dojo-type="dijit.form.Button" tabIndex="-1"
+					iconClass="Add" intermediateChanges="false" label="新增"
+					iconClass="dijitNoIcon"></input> <input type="button"
+					data-dojo-type="dijit.form.Button" tabIndex="-1" id="btnDel"
+					iconClass="Cross" intermediateChanges="false" label="删除"
+					iconClass="dijitNoIcon"></input> <span
+					data-dojo-type="dijit/ToolbarSeparator"></span> <input
+					type="button" data-dojo-type="dijit.form.Button" tabIndex="-1"
+					iconClass="Recordred" intermediateChanges="false" label="审核"
+					iconClass="dijitNoIcon" id='btnCheckSureTrue'></input> <input
+					type="button" data-dojo-type="dijit.form.Button" tabIndex="-1"
+					iconClass="Recordgreen" intermediateChanges="false" label="反审核"
+					id='btnCheckSureFalse' iconClass="dijitNoIcon"></input> <span
+					data-dojo-type="dijit/ToolbarSeparator"></span> <input
+					id="cmbchk_sure" data-dojo-type="dijit.form.ComboBox" value="全部"
+					tabIndex="-1" intermediateChanges="false" trim="false"
+					uppercase="false" lowercase="false" propercase="false"
+					invalidMessage="$_unset_$" pageSize="Infinity" searchDelay="200"
+					style="width: 62px;"
+					data-dojo-props="store:chk_sureStore,  searchAttr:'name'">
+					<input type="button" data-dojo-type="dijit.form.Button"
+					tabIndex="-1" iconClass="Zoom" intermediateChanges="false"
+					id="btnReflash" label="查询"></input> </span></td>
+		</tr>
+
+		<tr>
+			<td style="height: 100%">
+				<table id="MainGrid"
+					style="min-width: 1em; min-height: 1em; height: 100%"></table></td>
+		</tr>
+	</table>
+	<!-- 	<div data-dojo-type="dijit/layout/BorderContainer"
+		style="width: 100%; height: 100%;" id="mainDiv" data-dojo-props="design:'sidebar', gutters:true, liveSplitters:true">
+
+		<div data-dojo-type="dijit/layout/ContentPane"
+			data-dojo-props="region:'top'" style='padding:0;'> -->
+
+
+	<!-- </div>
+
+		<div data-dojo-type="dijit/layout/ContentPane"
+			data-dojo-props="region:'center'" style='padding:0;'> -->
+
+
+
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="myDialog"
+		title="编辑施工单位信息">
+		<div data-dojo-type="dijit/form/Form" id="myForm"
+			data-dojo-id="myForm" encType="multipart/form-data" action=""
+			method="">
+			<table class="dijitDialogPaneContentArea">
+				<tr style="display: none;">
+					<td><label for="id">编号:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						readonly="readonly" name="id" id="id"></td>
+				</tr>
+				<tr>
+					<td><label for="assitenCode">助记码:</label></td>
+					<td><input data-dojo-type="dijit/form/ValidationTextBox"
+						data-dojo-props="regExp:'^[A-Za-z]{0,8}$', invalidMessage:'只能是英文字母,并且最大长度不超过8位'"
+						name="assitenCode" id="assitenCode" required="true"></td>
+				</tr>
+				<tr>
+					<td><label for="unitName">施工单位:</label></td>
+					<td><input data-dojo-type="dijit/form/ValidationTextBox"
+						required="true"
+						data-dojo-props="regExp:'^.{0,40}$', invalidMessage:'长度不超过40位'"
+						name="unitName" id="unitName"></td>
+				</tr>
+				<tr>
+					<td><label for="linkMan">联系人:</label></td>
+					<td><input data-dojo-type="dijit/form/ValidationTextBox"
+						data-dojo-props="regExp:'^.{0,20}$', invalidMessage:'长度不超过20位'"
+						name="linkMan" id="linkMan"></td>
+				</tr>
+				<tr>
+					<td><label for="tel">联系电话:</label></td>
+					<td><input data-dojo-type="dijit/form/ValidationTextBox"
+						data-dojo-props="regExp:'^.{0,20}$', invalidMessage:'长度不超过20位'"
+						name="tel" id="tel"></td>
+				</tr>
+				<tr>
+					<td><label for="veriCode">验证码:</label></td>
+					<td><input data-dojo-type="dijit/form/ValidationTextBox"
+						data-dojo-props="regExp:'^.{0,20}$', invalidMessage:'长度不超过20位'"
+						name="veriCode" id="veriCode"></td>
+				</tr>
+				<tr>
+					<td><label for="comment">备注:</label></td>
+					<td><input data-dojo-type="dijit/form/ValidationTextBox"
+						data-dojo-props="regExp:'^.{0,200}$', invalidMessage:'长度不超过200位'"
+						name="comment" id="comment"> <!-- <input data-dojo-type="dijit/form/TextBox" name="timestamp" type="hidden"
+						id="timestamp" > --></td>
+				</tr>
+			</table>
+		</div>
+		<div class="dijitDialogPaneActionBar">
+			<button dojoType="dojox.form.BusyButton" type="button"
+				id="btnModifySubmnit" timeout=2000>保存</button>
+			<button dojoType="dijit.form.Button" type="button"
+				onClick="myDialog.onCancel();" id="btnModifyCancel">取消</button>
+		</div>
+	</div>
+	<!-- 	</div> -->
+</body>
+</html>

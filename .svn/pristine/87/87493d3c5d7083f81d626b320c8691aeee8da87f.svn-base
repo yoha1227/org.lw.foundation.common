@@ -1,0 +1,167 @@
+define(["dojo/_base/declare", 
+        "dojo/request",
+        "dojo/json"
+        ], function(declare, request, json) {
+	
+	return declare(null, {
+		constructor: function(tgtBaseUrl){
+			this.serviceBaseUrl = tgtBaseUrl;
+			
+		    this.newEntity = function (entity, callback, errCallback) {
+		    	var resultEntity = null;
+		    	
+		    	if (typeof callback == "undefined") {
+		    		request.post(this.serviceBaseUrl, {
+		    			sync : true,
+						data : json.stringify(entity),
+						handleAs : "json",
+						headers : {
+							"Content-Type" : "application/json"
+						}
+		            }).then(function(responseJson) {
+		            	resultEntity = responseJson;
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	} else {
+		    		request.post(this.serviceBaseUrl, {
+		    			sync : false,
+						data : json.stringify(entity),
+						handleAs : "json",
+						headers : {
+							"Content-Type" : "application/json"
+						}
+		            }).then(function(responseJson) {
+		            	return callback(responseJson);
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return errCallback(error);
+		            });	
+		    	}
+		    	
+		    	return resultEntity;
+		    };
+		    
+		    this.updateEntity = function (entity, callback) {
+		    	var resultEntity = null;
+		    	
+		    	if (typeof callback == "undefined") {
+		    		request.put(this.serviceBaseUrl, {
+		    			sync : true,
+						data : json.stringify(entity),
+						handleAs : "json",
+						headers : {
+							"Content-Type" : "application/json"
+						}
+		            }).then(function(responseJson) {
+		            	resultEntity = responseJson;
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	} else {
+		    		request.put(this.serviceBaseUrl, {
+		    			sync : false,
+						data : json.stringify(entity),
+						handleAs : "json",
+						headers : {
+							"Content-Type" : "application/json"
+						}
+		            }).then(function(responseJson) {
+		            	return callback(responseJson);
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	}
+		    	
+		    	return resultEntity;
+		    };
+		    
+		    this.deleteEntityById =  function (id, callback) {
+		    	if (typeof callback == "undefined") {
+		    		request.del(this.serviceBaseUrl + id, {
+		    			sync: true,
+		    			timeout: 2000,
+		                handleAs: "json"
+		            }).then(function(responseJson) {
+		            	return responseJson;
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	} else {
+		    		request.del(this.serviceBaseUrl + id, {
+		    			sync: false,
+		                handleAs: "json"
+		            }).then(function(responseJson) {
+		            	return callback(responseJson);
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	}
+		    };
+		    
+		    this.getEntityById = function (id, callback) {
+		    	var entity = null;
+		    	
+		    	if (typeof callback == "undefined") {
+		    		request.get(this.serviceBaseUrl + id, {
+		    			sync: true,
+		    			timeout: 2000,
+		                handleAs: "json"
+		            }).then(function(entityJson) {
+		            	entity = entityJson;
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	} else {
+		    		request.get(this.serviceBaseUrl + id, {
+		    			sync: false,
+		                handleAs: "json"
+		            }).then(function(entityJson) {
+		            	return callback(entityJson);
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	}
+		    	
+		    	return entity;
+		    };
+		    
+		    this.getDefaultEntity = function (callback) {
+		    	var entity = null;
+		    	
+		    	if (typeof callback == "undefined") {
+		    		request.get(this.serviceBaseUrl + "default/", {
+		    			sync: true,
+		    			timeout: 2000,
+		                handleAs: "json"
+		            }).then(function(entityJson) {
+		            	entity = entityJson;
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            });	
+		    	} else {
+		    		request.get(this.serviceBaseUrl + "default/", {
+		    			sync: false,
+		                handleAs: "json"
+		            }).then(function(entityJson) {
+		            	return callback(entityJson);
+		            }, function(error) {
+		            	console.log("An error occurred: " + error);
+		            	return null;
+		            });	
+		    	}
+		    	
+		    	return entity;
+		   };
+		    
+		}
+	  });
+
+});

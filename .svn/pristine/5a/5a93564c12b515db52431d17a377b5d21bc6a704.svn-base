@@ -1,0 +1,262 @@
+/**
+ * 手风琴式导航栏（菜单栏）基类
+ */
+define([
+		// import modules will be inherited by our widget:
+        "dijit/layout/AccordionContainer",
+		// import modules used by our widget:
+        "dijit/layout/ContentPane",
+        "dijit/DropDownMenu",
+        "dojo/dom", 
+        "dojo/dom-attr",
+		"dijit/registry",
+        "dojo/query",
+        "dojo/_base/lang", 
+        "dojo/_base/array",
+        "dojo/_base/declare",
+        "dojo/request",
+        "dojo/topic",
+		"dojox3rd/widget/SyncCheckedMenuItem",
+		"dojox3rd/sys/modelSingleton", 
+		"dojox3rd/sys/topicSingleton"
+		], function(AccordionContainer, ContentPane, DropDownMenu, dom, domAttr, registry, query,
+        		lang, array, declare, request, topic, 
+        		SyncCheckedMenuItem, modelSingleton, topicSingleton){
+	
+	function MenuClickCallback (callback) {
+		if (typeof callback != "undefined")
+			this.customizedCallback = callback;
+		else
+			this.customizedCallback = null;
+			
+		// "this" pointer maybe changed to not this widget in some function scope 
+		var _thisCallback = this;
+		
+		this.onMenuClick = function(evt) {
+			var clickedMenuItem = this;
+			
+    		modelSingleton.getModelById("menuModel").set("selectedMenuItem", clickedMenuItem);
+    		
+    		// fire the function call command (Event) out to workspace
+    		modelSingleton.getModelById("workspaceModel").set("functionXPath", clickedMenuItem.functionXPath);
+    		modelSingleton.getModelById("workspaceModel").set("functionParams", { 
+    										functionName: clickedMenuItem.functionName, 
+    										functionParam: null});
+    		
+    		if (_thisCallback.customizedCallback != null)
+    			_thisCallback.customizedCallback(evt);
+		};
+	}
+	
+	return declare("dojox3rd.widget_template.MenuItemAccordionContainer", AccordionContainer, {
+    	
+		//define our attribute variables here:
+        menuRegister : null,
+
+        _functionXPathWithNameMap : {},
+        
+        _selectedMenuPane : null,
+        _selectedMenuItem : null,
+								
+        _setMenuRegisterAttr : function(/*Object*/ menuRegister){
+        	this._set("menuRegister", menuRegister);
+        },
+				
+        _buildMenuPane: function(menuPaneInfo) {
+			// "this" pointer maybe changed to not this widget in some function scope 
+			var _thisWidget = this;
+			
+        	var menuPaneWidget = new ContentPane({
+				id: "menuPane-" + menuPaneInfo.id,
+	            title: menuPaneInfo.label,
+	            disabled: menuPaneInfo.disabled
+	        });
+        	
+        	var menuBoxWidget = new DropDownMenu({
+				id: "menuBox-" + menuPaneInfo.id,
+	            title: menuPaneInfo.label,
+	            style: "height: auto; width: 100%; border: 0;"
+	        });
+        	
+        	menuPaneWidget.addChild(menuBoxWidget);
+
+			array.forEach(menuPaneInfo.children, function(menuItemInfo) {
+				if (menuItemInfo.menuType == "menuItem") {
+					var menuItemWidget = _thisWidget._buildMenuItem(menuItemInfo, menuPaneWidget);
+					menuBoxWidget.addChild(menuItemWidget);
+					
+		        	if (menuItemInfo.selected) {
+		        		_thisWidget._selectedMenuItem = menuItemWidget;
+		        		
+		        		var watchedAttr = "selectedMenuItem";
+		        		var menuModel = modelSingleton.getModelById("menuModel");
+		        		
+		        		menuModel.set(watchedAttr, _thisWidget._selectedMenuItem);
+		        		
+		                // occur from internal event, such as other pane or menuItem click
+		        		menuModel.watch(watchedAttr, function(name, oldValue, value){
+		        			if (name == watchedAttr)
+		        				_thisWidget._menuItemSelectedHasChanged(value);
+							console.log(name, oldValue, value);
+						});
+
+		        	}
+
+				} else {
+					throw new Error("not menuType of 'menuItem'!");
+				};
+			});
+      	
+        	return menuPaneWidget;
+        },
+        
+        _buildMenuItem: function(menuItemInfo, menuPaneWidget) {
+        	var menuItemWidget = new SyncCheckedMenuItem({
+				id: "menuItem-" + menuItemInfo.id,
+				label: menuItemInfo.label,
+				accelKey: menuItemInfo.accelKey,
+	            disabled: menuItemInfo.disabled,
+	            style: "height: auto; width: 90%; border: 1;"
+	        });
+        	
+        	menuItemWidget.functionXPath = menuItemInfo.functionXPath;
+        	menuItemWidget.functionName = menuItemInfo.functionName;
+        	var menuPaneItemPair = {
+					menuPaneObj: menuPaneWidget, 
+					menuItemObj: menuItemWidget};
+        	this._functionXPathWithNameMap[ menuItemWidget.functionXPath + "?" + 
+        	                                menuItemWidget.functionName ] = menuPaneItemPair;
+        	
+    		var menuClickCallback;
+			// if has customized onClick behavior, register here
+    		if ((typeof menuItemInfo.onClick != "undefined") && (menuItemInfo.onClick != null)) {
+    			var onClickCallback = eval(menuItemInfo.onClick);
+    			menuClickCallback = new MenuClickCallback(onClickCallback);
+   			} else
+    			menuClickCallback = new MenuClickCallback();
+
+    		menuItemWidget.onClick = menuClickCallback.onMenuClick;
+        	
+        	return menuItemWidget;
+        },
+        
+        // occur from internal event, such as other pane or menuItem click
+        _menuItemSelectedHasChanged: function(menuItemWidget) {
+    		
+        	if (this._selectedMenuItem != null)
+        		this._selectedMenuItem.setUnchecked();
+    		
+    		this._selectedMenuItem = menuItemWidget;
+    		this._selectedMenuItem.setChecked();  
+    		
+       },
+        
+        _finishSelectedChanged: function() {
+
+        	if (this._selectedMenuPane !== this.selectedChildWidget)
+        		this.selectChild(this._selectedMenuPane, true);
+        	
+        	if (this._selectedMenuItem != null) {
+        		this._selectedMenuItem.setChecked();
+       		
+        		// fire the function call command (Event) out to workspace
+        		modelSingleton.getModelById("workspaceModel").set("functionXPath", this._selectedMenuItem.functionXPath);
+        		modelSingleton.getModelById("workspaceModel").set("functionParams", { 
+        										functionName: this._selectedMenuItem.functionName, 
+        										functionParam: null});
+        	}         	
+        },
+        
+        // occur from external event, such as workspace uiViewItem changed
+        changeSelected: function(menuPaneWidget, menuItemWidget) {
+        	
+    		this._selectedMenuPane = menuPaneWidget;
+        	if (this._selectedMenuPane !== this.selectedChildWidget)
+        		this.selectChild(this._selectedMenuPane, true);
+    		
+        	if (this._selectedMenuItem != null)
+        		this._selectedMenuItem.setUnchecked();
+    		this._selectedMenuItem = menuItemWidget;
+    		this._selectedMenuItem.setChecked();
+        },
+        
+        // Override this method to perform custom behavior during dijit construction.
+		// Common operations for constructor:
+		// 1) Initialize non-primitive types (i.e. objects and arrays)
+		// 2) Add additional properties needed by succeeding lifecycle methods
+		constructor : function() {
+			
+		},
+
+		// When this method is called, all variables inherited from superclasses are 'mixed in'.
+		// Common operations for postMixInProperties
+		// 1) Modify or assign values for widget property variables defined in the template HTML file
+		postMixInProperties : function() {
+			
+		},
+
+		// postCreate() is called after buildRendering().  This is useful to override when 
+		// you need to access and/or manipulate DOM nodes included with your widget.
+		// DOM nodes and widgets with the dojoAttachPoint attribute specified can now be directly
+		// accessed as fields on "this". 
+		// Common operations for postCreate
+		// 1) Access and manipulate DOM nodes created in buildRendering()
+		// 2) Add new DOM nodes or widgets 
+		postCreate : function() {
+//			this.inherited(arguments);							
+			
+			// "this" pointer maybe changed to not this widget in some function scope 
+			var _thisWidget = this;
+			
+			// load default entity value from json
+			request.get(_thisWidget.menuRegister, {
+				sync : true,
+				timeout : 2000,
+				handleAs : "json"
+			}).then(function(menuRegisterJson) {
+				var menuRegisterInfo = menuRegisterJson;
+				
+				array.forEach(menuRegisterInfo, function(menuPaneInfo) {
+					if (menuPaneInfo.menuType == "menuPane") {
+						var menuPaneWidget = _thisWidget._buildMenuPane(menuPaneInfo);
+						_thisWidget.addChild(menuPaneWidget);
+						
+			        	if (menuPaneInfo.selected) {
+			        		_thisWidget._selectedMenuPane = menuPaneWidget;
+			        		
+			        		modelSingleton.getModelById("menuModel").set("selectedMenuPane", _thisWidget._selectedMenuPane);
+			        	};
+
+					} else {
+						throw new Error("not menuType of 'menuPane'!");
+					};
+				});
+
+				modelSingleton.getModelById("menuModel").watch("functionXPathWithName", function(name, oldValue, value){
+        			if (name == "functionXPathWithName") {
+        				var functionXPathWithName = value;
+        				var menuPaneItemPair = _thisWidget._functionXPathWithNameMap[functionXPathWithName.functionXPath + "?" + 
+        				                                                             functionXPathWithName.functionName];
+        				
+        				_thisWidget.changeSelected(menuPaneItemPair.menuPaneObj, menuPaneItemPair.menuItemObj);
+        			}
+ 					console.log(name, oldValue, value);
+				});
+
+			});
+			
+		},
+		
+        /**
+         * 先根据初始化menu，创建所有的子节点，再由基类进行初始化
+         */
+        startup : function(){
+        	
+            this.inherited(arguments);
+            
+            this._finishSelectedChanged();
+         }       
+    
+   });
+
+});

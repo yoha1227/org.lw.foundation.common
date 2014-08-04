@@ -1,0 +1,39 @@
+/**
+ * 扩展array的forEach方法 如果回调函数返回false，则中止循环
+ */
+define([ "dojo/has", 
+         "dojo/_base/array", 
+         "dojo/_base/lang" ], 
+         function(has, array, lang) {
+	
+	function forEach(a, fn, o) {
+		var i = 0, l = a && a.length || 0;
+		if (l && typeof a == "string")
+			a = a.split("");
+		if (typeof fn == "string")
+			fn = cache[fn] || buildFn(fn);
+		if (o) {
+			for (; i < l; ++i) {
+				if (fn.call(o, a[i], i, a) === false) {
+					break;
+				}
+			}
+		} else {
+			for (; i < l; ++i) {
+				if (fn(a[i], i, a) === false) {
+					break;
+				}
+			}
+		}
+	}
+
+	var newForEach = {
+		forEach : forEach
+	};
+
+	lang.mixin(array, newForEach);
+
+	has("extend-dojo") && lang.mixin(dojo, newForEach);
+
+	return array;
+});

@@ -1,0 +1,370 @@
+/**
+ * 
+ */
+define(
+		[ "dojo/store/Memory", 
+		  "dojo/topic", 
+		  "dojo/aspect",
+		  "appDojox3rd/server/RestfulServiceProxy", 
+		  "appDojox3rd/base/array",
+		  "dijit/form/FilteringSelect", 
+		  "dijit/form/_FormValueWidget", 
+		  "dojo/_base/config",
+		  "dojo/_base/lang", 
+		  "dojo/_base/declare" ],
+		function(memory, topic, aspect, restfulServiceProxy, array, filteringSelect,
+				formValueWidget, config, lang, declare) {
+			var url = config.project.serviceUrl + "entity/resteasy/administrativeDivision/", rootUrl = url
+					+ "root", subUrl = url + "sub_division/", parentUrl = url + "division/",
+			// 所有父级数据，数组顺序为下级向父级排列，每次使用BindDataByParentId前，该变量都必须重置
+			parentData = [],
+			// 显示下级数据时发布消息的名称，用在widget的onChange事件中
+			showNextName = "show_next_widget",
+			// 取完所有父级数据后的发布消息的名称
+			getParentName = "suntang/dojox3rd/form/AdministrativeDivision/getParentComplete";
+
+			function requestError() {
+
+			}
+			// 成功取得下级数据并设置widget的默认值
+			function requestOk(widget, defaultValue, response) {
+				var first = {};
+				var rf = response[0];
+				for ( var i in rf) {
+					first[i] = "";
+				}
+				var d = [ first ].concat(response);
+				var store = new memory({
+					data : d
+				});
+				widget.set({
+					"store" : store,
+					"value" : defaultValue || "",
+				});
+			}
+			// 根据id值取得下级数据
+			function bindDataById(id, widget, defaultValue) {
+				restfulServiceProxy({
+					url : id == 0 ? (rootUrl) : (subUrl + id)
+				}).addCallbacks(lang.partial(requestOk, widget, defaultValue), requestError)
+			}
+			// widget的onChange事件
+			function onFilteringSelectChang(e) {
+				var value = this.get("value");
+				topic.publish(this.get("id") + "/" + showNextName, value, this
+						.get("subDefaultValue"));
+				this.set("subDefaultValue", "");
+			}
+			// 根据父id取得父id的相关数据，关存入parentData变量
+			function BindDataByParentId(parentId) {
+				restfulServiceProxy({
+					url : parentUrl + parentId
+				}).addCallbacks(function(response) {
+					parentData.push(response);
+					if (response["parentId"]) {
+						BindDataByParentId(response["parentId"]);
+					} else {
+						topic.publish(getParentName, parentData);
+					}
+				})
+			}
+
+			return declare(
+					"suntang.dojox3rd.form.AdministrativeDivision",
+					formValueWidget,
+					{
+						constructor : function() {
+							this._children = [];
+							this._filteringOldValid = function() {
+							};
+							this.inherited(arguments);
+						},
+						// 初始化时的默认值
+						defaultValue : 0,
+						// 初始化时与defaultValue对应的父ID值，为0则表示顶级数据
+						parentIdOfDefault : null,
+						// 表示必须输入一个有效的值，该项一般不需要更改
+						required : true,
+						// 1表示必须选择省，2表示必须选择市，3表示必须选择县
+						requiredLevel : 1,
+						/**
+						 * 不能在初始化的时候设置value值 { id:1 parentId:0 }
+						 */
+						value : "",
+						disabled : false,
+						// dijit.form.Form中需要用到的属性
+						state : "",
+						// _filteringOldValid : function(){},
+						id : "",
+						// _children : [],
+						/**
+						 * filteringSelect的默认属性
+						 */
+						filteringSelectProps : {
+							searchAttr : "divisionName",
+							style : "width:10em"
+						},
+						// 检测部件状态是否是可提交的
+						isValid : function() {
+							var iv = true;
+							// var required = this.required;
+							array.forEach(this.getChildren(), function(widget) {
+								if (!widget.isValid()) {
+									iv = false;
+									return false;
+								}
+							});
+							// if (iv && required){
+							// iv = (this.getChildren()[0].get("value") !== "");
+							// }
+							return iv;
+						},
+						startup : function() {
+							if (!this._started) {
+								var self = this;
+								/**
+								 * 订阅获取所有父级数据后发布的消息
+								 */
+								this.subscribe(getParentName, function(parentData) {
+									var data = parentData.reverse();
+									var children = self.getChildren();
+									array.forEach(children, function(widget, index) {
+										var nextDefaultValue = parentData[index + 1];
+										if (nextDefaultValue) {
+											widget.subDefaultValue = nextDefaultValue.id; // 该值设定下级数据的默认值
+										}
+									});
+									if (children[0].get("item")) {
+										// 顶级选项已经初始化则只需要设置value
+										children[0].set("value", parentData[0].id);
+									} else {
+										// 顶级选项没有初始化则进行初始化，并设置默认值
+										bindDataById(0, children[0], parentData[0].id);
+									}
+								});
+								this.set({
+									"value" : {
+										id : this.defaultValue,
+										parentId : this.parentIdOfDefault
+									},
+									"required" : this.required,
+									"requiredLevel" : this.requiredLevel,
+									"disabled" : this.disabled
+								});
+
+								this.inherited(arguments);
+							}
+						},
+						templateString : "<div data-dojo-attach-point='focusNode,containerNode' role='presentation'>"
+								// +"<span data-dojo-attach-point=''></span>"
+								+ "<span>省<span data-dojo-attach-point='shengNode'></span></span>"
+								+ "&nbsp;<span>市<span data-dojo-attach-point='shiNode'></span></span>"
+								+ "&nbsp;<span>区/县<span data-dojo-attach-point='quNode'></span></span>"
+								// +"</span>"
+								+ "</div>",
+						postCreate : function() {
+							var self = this;
+							// 省
+							this.addChild(new filteringSelect(lang.mixin({
+								onChange : onFilteringSelectChang
+							}, this.filteringSelectProps), this.shengNode));
+							// 市
+							this.addChild(new filteringSelect(lang.mixin({
+								required : false,
+								onChange : onFilteringSelectChang
+							}, this.filteringSelectProps), this.shiNode));
+							// 区
+							this.addChild(new filteringSelect(lang.mixin({
+								required : false
+							}, this.filteringSelectProps), this.quNode));
+							var children = this.getChildren(), nextWidget;
+							this._filteringOldValid = children[0].isValid;
+							array.forEach(children, function(widget, index) {
+								self.subscribe(widget.get("id") + "/" + showNextName, function(
+										changeVal, defaultValue) {
+									// 将所有下级列表数据清空
+									for ( var i = index + 1; i < children.length; i++) {
+										var store = children[i].get("store");
+										store.data = [];
+										children[i].set({
+											"store" : store,
+											value : "",
+											item : null
+										});
+									}
+									if (changeVal) {
+										nextWidget = children[index + 1];
+										if (nextWidget) {
+											bindDataById(changeVal, nextWidget, defaultValue);
+										}
+									}
+								});
+								aspect.after(widget, "_setValueAttr", function() {
+									// 重围item，主要是为了isValid的正常执行
+									// 如果item为一个对象，isValid则返回true,而选择空值的时候，item也会是一个对象，所以需要重置
+									if (this.get("item") && this.get("item").id == "") {
+										this.set("item", null);
+									}
+								})
+								// aspect.after(widget, "_setStoreAttr",
+								// function(){
+								// this.state = "";
+								// console.log("come in")
+								// })
+							})
+							this.inherited(arguments);
+						},
+						addChild : function(child) {
+							if (child.isInstanceOf(filteringSelect)) {
+								this._children.push(child);
+							}
+						},
+						getChildren : function() {
+							return this._children;
+						},
+						getValues : function() {
+							var r = [];
+							var self = this;
+							array.forEach(this.getChildren(), function(widget) {
+								r.push({
+									value : widget.get("value"),
+									item : widget.item,
+									widget : widget
+								});
+							})
+							return r;
+						},
+						/**
+						 * 取得某个子widget的值，如果child为空，则获取省市区中有效的级别最低的值
+						 * 
+						 * @param {Object}
+						 *            child
+						 */
+						getValue : function(child) {
+							var item = {};
+							if (!child) {
+								var children = this.getChildren();
+								var i = children.length - 1;
+								for (; i > -1; i--) {
+									if (children[i].get("value")) {
+										item = children[i].item;
+										break;
+									}
+								}
+							} else {
+								if (lang.isString(child)) {
+									child = dijit.byId(child);
+								}
+								if (child.isInstanceOf(filteringSelect)) {
+									item = child.item;
+								}
+							}
+							return {
+								id : item.id || null,
+								parentId : item.parentId || null
+							};
+						},
+						// 验证输入的值
+						validate : function() {
+							var isVld = true;
+							array.forEach(this.getChildren(), function(widget) {
+								if (!widget.validate()) {
+									isVld = false;
+									return false;
+								}
+							});
+							return isVld;
+						},
+						reset : function() {
+
+						},
+						_setValueAttr : function(value) {
+							if (this._created) {
+								var children = this.getChildren(), exists = false;
+								array.forEach(children, function(widget) {
+									if (widget.get("store")) {
+										array.forEach(widget.get("store").data, function(item) {
+											if (item.id == value.id) {
+												widget.set("value", value.id);
+												exists = true;
+												return false;
+											}
+										})
+									}
+
+									if (exists)
+										return false;
+								});
+
+								if (!exists) {
+									if (value.parentId) {
+										parentData = [ value ];
+										BindDataByParentId(value.parentId);
+									} else {
+										var widget = this.getChildren()[0];
+										bindDataById(0, widget, value.id);
+									}
+								}
+							}
+						},
+						_getValueAttr : function() {
+							return this.getValue();
+						},
+						/**
+						 * 禁用
+						 * 
+						 * @param {Object}
+						 *            disabled
+						 */
+						_setDisabledAttr : function(disabled) {
+							if (this._created) {
+								// this.disabled = disabled;
+								array.forEach(this.getChildren(), function(widget) {
+									widget.set({
+										disabled : disabled
+									});
+								})
+							}
+						},
+						_setRequiredAttr : function(required) {
+							if (this._created) {
+								// this.required = required;
+								var level = this.requiredLevel;
+								var requiredProps = {
+									"required" : true,
+									"promptMessage" : ""
+								};
+								var notRequiredProps = {
+									"required" : false,
+									"promptMessage" : ""
+								};
+								array.forEach(this.getChildren(), function(widget, index) {
+									if (required == false) {
+										widget.set(notRequiredProps);
+									} else {
+										if (index < level) {
+											widget.set(requiredProps);
+										} else {
+											widget.set(notRequiredProps);
+										}
+									}
+								});
+							}
+						},
+						_setRequiredLevelAttr : function(requiredLevel) {
+							if (this._created) {
+								// this.requiredLevel = requiredLevel;
+								if (this.required) {
+									this.set("required", this.required);
+								}
+							}
+						},
+						/**
+						 * 重写父方法，使其不发生作用。该事件会导致filteringSelect无法显示下拉列表
+						 * 父方法定义于：_FormWidgetMixin
+						 */
+						_onMouseDown : function() {
+
+						}
+					});
+		})

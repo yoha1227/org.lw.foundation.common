@@ -1,0 +1,31 @@
+require([
+		"dijit/registry",
+		"dojo/on",
+		"dojo/dom",
+		"dojo/dom-attr",
+		"dojo/Stateful",
+		"dojo/request",
+		"affairService/affairEntryDaoStub",
+		"dojox3rd/mvc/mvcUtils",
+		"dojox3rd/utils/urlParsers",
+		"dojo/store/Memory",
+		"dojo/dom-geometry",
+		"dojo/json",
+		"dojo/ready", 
+		"dojo/when", 
+		"dojo/parser" ],
+	function(registry, on, dom, domAttr, Stateful, request,
+				affairEntryDao, mvcUtils, urlParsers, Memory, domGeometry, json, ready, when, parser) {
+		
+		var viewScopePrefix = "affair_accept";
+		parser.parse({
+            rootNode: viewScopePrefix + "-" + "RootNode"
+            }).then(function(){
+            	var affairEntryGrid = registry.byId(viewScopePrefix + "-" + "affairEntryGrid");
+            	on(dom.byId(viewScopePrefix + "-" + "addBtn"), "click", function() {			
+            		registry.byId(viewScopePrefix + "-" +"Dialog").show();
+        		});
+            	
+	  });
+		
+});

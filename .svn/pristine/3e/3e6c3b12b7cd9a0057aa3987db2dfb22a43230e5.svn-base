@@ -1,0 +1,49 @@
+/**
+ * 
+ */
+define(["dojo/dom",
+    "dojo/dom-attr",
+    "dojo/dom-construct"],
+function (dom, domattr, domConstruct) {
+
+    // the result object
+    var iframeInjector = {
+        // summary:
+        //		This module defines the iframeInjector API.
+    };
+
+    iframeInjector.injectIframeTo = function (parentNode, iframeUrl, parentTopic) {
+
+
+        var targetIframe = domConstruct.create("iframe", {
+            	id: parentNode.id + "_iframe",
+            	src: iframeUrl,
+            	width: "100%",
+            	height: "100%"
+        	}, parentNode);
+                
+        targetIframe.topic = parentTopic;
+
+        appendScriptToDocHead(targetIframe.contentDocument, dojoConfig.appBaseUrl + "/common/dojox3rd/iframe/iframeInit.js", function(){
+        	console.debug("load iframeInit.js ok!");
+        });
+        
+/*		var script = domConstruct.create("script", {
+				type : "'text/javascript",
+				src : dojoConfig.appBaseUrl + "/common/dojox3rd/iframe/iframeInit.js"
+        	}, targetIframe.contentDocument.head);
+		
+		script.innerHTML = "var dojoConfig;";
+*/		
+        var err_msg = "Your browser does not support iframes!";
+
+		domConstruct.create("p", {
+                    innerHTML: err_msg
+                }, targetIframe)
+        
+        return targetIframe;
+    };
+
+    return iframeInjector;
+
+});

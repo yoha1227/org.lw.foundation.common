@@ -1,0 +1,39 @@
+<div class="AffairEntryFilterPanel">
+	<form data-dojo-type="dijit/form/Form" style="width: 100%">
+		<fieldset style="border: 2px groove threedface; margin: 2px; padding: 0.75em;">
+			<legend>查询条件</legend>
+			<div style="width: 635px; float: left; height: 140px;">
+				<table border="1"
+					style="border-collapse: collapse; table-layout: fixed; width: 100%; height: auto;"
+					class="table-list">
+					<tbody>
+						<tr>
+							<td class="t_l title">事件编号：</td>
+							<td><input type="text" name="affairId" data-dojo-type="dijit/form/TextBox"></input>
+							</td>
+							<td class="t_l title">事件标题：</td>
+							<td><input name="affairEntryDetail.subject" type="text"
+								data-dojo-type="dijit/form/TextBox"></input>
+							</td>
+						</tr>
+						<tr>
+							<td class="t_l title">事件状态：</td>
+							<td><select name="operateState" id="operateStateSelector"
+								data-dojo-type="dijit/form/FilteringSelect" intermediateChanges="false" trim="false"
+								uppercase="false" lowercase="false" propercase="false" required="false"
+								invalidMessage="$_unset_$" pageSize="Infinity" searchDelay="200">
+							</select>
+							</td>
+							<td class="t_l title">&nbsp;</td>
+							<td>
+                                &nbsp;
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div style="clear: both;"></div>
+		</fieldset>
+	</form>
+</div>
+

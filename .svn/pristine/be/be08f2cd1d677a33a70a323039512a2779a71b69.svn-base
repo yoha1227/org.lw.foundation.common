@@ -1,0 +1,270 @@
+/**
+ * summary:
+ *			This module defines the mvcUtils API.
+ */
+define([
+        "dojo/_base/array",
+		"dojox/mvc/at",
+		"dojo/Stateful",
+		"dijit/registry",
+		"dojo/query",
+		"dojo/dom",
+		"dojo/dom-attr"
+		], function (array, at, Stateful, registry, query, dom, domAttr) {
+
+    // the result object
+	var mvcUtils = {
+    		
+    };
+
+	// copy back data from source model to entity
+    mvcUtils.copyEntityDataFromModel = function (entity, model){
+    	if ((typeof model == "undefined") || (model == null)) {
+    		return;
+    	}
+    	
+		if (entity instanceof Array) {
+			for (var item in entity) {
+				var itemValue = model.get(item);
+				var itemElem = entity[item];
+				if ((itemElem instanceof Array) || (itemElem instanceof Object)) {
+					this.copyEntityDataFromModel(itemElem, itemValue);							
+				} else {
+					entity[item] = itemValue;
+				}
+			}
+		} else if (entity instanceof Object) {
+			for (var attr in entity) {
+				var attrValue = model.get(attr);
+				var attrElem = entity[attr];
+				if ((attrElem instanceof Array) || (attrElem instanceof Object)) {
+					this.copyEntityDataFromModel(attrElem, attrValue);
+				} else {
+					entity[attr] = attrValue;
+				}
+			}
+		} else {
+			throw new Error("not support value copy!");							
+		}
+		
+	};
+
+	// copy data from entity to source model
+	mvcUtils.copyEntityDataToModel = function (entity, model){
+    	if ((typeof model == "undefined") || (model == null)) {
+    		return;
+    	}
+    	
+		if (entity instanceof Array) {
+			for (var item in entity) {
+				var itemValue = model[item];
+				var itemElem = entity[item];
+				if ((itemElem instanceof Array) || (itemElem instanceof Object)) {
+					this.copyEntityDataToModel(itemElem, itemValue);							
+				} else {
+					 model[item] = itemElem;
+				}
+			}
+		} else if (entity instanceof Object) {
+			for (var attr in entity) {
+				var attrValue = model[attr];
+				var attrElem = entity[attr];
+				if ((attrElem instanceof Array) || (attrElem instanceof Object)) {
+					this.copyEntityDataToModel(attrElem, attrValue);
+				} else {
+					 model[attr]= attrElem;
+				}
+			}
+		} else {
+			throw new Error("not support value copy!");							
+		}
+		
+	};
+
+	mvcUtils.findAllNodeHasAttrInTree = function (attrName, nodeTree) {
+		var listFromChild = query("[" + attrName + "]", nodeTree);
+		
+		var nodeAttrValue = domAttr.get(nodeTree, attrName);
+		if ((typeof nodeAttrValue != "undefined") && (nodeAttrValue != null))
+			listFromChild.push(nodeTree);
+		
+		return listFromChild;
+	};
+
+	mvcUtils.findFirstNodeWithAttrValueInTree = function (attrName, attrValue, nodeTree) {
+		var nodeAttrValue = domAttr.get(nodeTree, attrName);
+		if ((typeof nodeAttrValue != "undefined") && (nodeAttrValue == attrValue))
+			return nodeTree;
+		
+		var resultList = query("[" + attrName + "=" + attrValue + "]", nodeTree);
+		if (resultList.length > 0)
+			return resultList[0];
+		else
+			return null;
+	};
+
+	mvcUtils.findFirstNodeWithNodeName = function (nodeName, nodeTree) {
+		for (var node in nodeTree.childNodes) {
+			if (nodeTree.childNodes[node].nodeName == nodeName) {
+				return nodeTree.childNodes[node];
+			}
+		}
+		
+		return null;
+	};
+
+/*	mvcUtils.findAllNodeHasAttrInTree = function (attrName, nodeTree) {
+		var nodeList = new Array();
+		
+		var nodeAttrValue = domAttr.get(nodeTree, attrName);
+		if ((typeof nodeAttrValue != "undefined") && (nodeAttrValue != null)) {
+			nodeList.push(nodeTree);
+		} else {
+			for (var node = 0; node < nodeTree.childNodes.length; node++) {
+				var childNode = nodeTree.childNodes[node];
+				var childNodeList = this.findAllNodeHasAttrInTree(attrName, childNode);
+				nodeList = nodeList.concat(childNodeList);
+			}
+		}
+		
+		return nodeList;
+	};
+	
+	mvcUtils.findFirstNodeWithAttrValueInTree = function (attrName, attrValue, nodeTree) {
+		var nodeAttrValue = domAttr.get(nodeTree, attrName);
+		if ((typeof nodeAttrValue != "undefined") && (nodeAttrValue == attrValue)) {
+			return nodeTree;
+		} else {
+			for (var node = 0; node < nodeTree.childNodes.length; node++) {
+				var childNode = nodeTree.childNodes[node];
+				var resultNode = this.findFirstNodeWithAttrValueInTree(attrName, attrValue, childNode);
+				if (resultNode != null)
+					return resultNode;
+			}
+		}
+		
+		return null;
+	};
+*/	
+		
+	// assembly a default entity prototype (for Model) from View(widget)
+	mvcUtils.assemblyEntityPrototypeFromWidget = function (sourceWidget){
+		var entityAttributeList = [];
+		var prototypeEntity = {};
+
+		// mvc/Model/attributes: html node has a name set to property equal to class field
+		if ((typeof sourceWidget.getChildren == "function") && (sourceWidget.getChildren != null)) {
+			sourceWidget.getChildren().forEach(function(domNode) {
+				var nodeNameAttr = domNode.get("name");
+				if ((typeof nodeNameAttr != "undefined") && (nodeNameAttr != null)) {
+					entityAttributeList.push(nodeNameAttr);
+				}
+			});
+		} else {
+			throw new Error("node is not Widget!");
+		}
+		
+		for (var attr in entityAttributeList) {
+			prototypeEntity[entityAttributeList[attr]] = null;
+		}
+		return prototypeEntity;
+	};
+	
+	mvcUtils.assemblyEntityPrototypeFromDomNode = function (sourceWidget){
+		var entityAttributeList = [];
+		var prototypeEntity = {};
+
+		var nodeList = this.findAllNodeHasAttrInTree("name", sourceWidget);
+		for (var node = 0; node < nodeList.length; node++) {
+			entityAttributeList.push(domAttr.get(nodeList[node], "name"));
+		}
+		
+		for (var attr in entityAttributeList) {
+			prototypeEntity[entityAttributeList[attr]] = null;
+		}
+		return prototypeEntity;
+	};
+	
+	// mvc/Binding: binding Controller with the Model(data store) to View(widget)
+	mvcUtils.bindingControllerWithModelToWidget = function (contoller, targetWidget){
+		if ((typeof targetWidget.getChildren == "function") && (targetWidget.getChildren != null)) {
+			targetWidget.getChildren().forEach(function(domNode) {
+				//all mvc html node has a name set to property equal to class field
+				if (typeof contoller.get(domNode.get("name")) != "undefined") {
+					domNode.set("value", at(contoller, domNode.get("name")));
+				}
+			});
+		} else {
+			throw new Error("node is not Widget!");
+		}
+		
+	};
+	
+	// mvc/Binding: binding Controller with the Model(data store) to View(widget)
+	mvcUtils.bindingControllerWithModelToDomNode = function (contoller, targetWidget){
+		var nodeList = this.findAllNodeHasAttrInTree("name", targetWidget);
+		for (var node = 0; node < nodeList.length; node++) {
+			var nodeAttrValue = domAttr.get(nodeList[node], "name");
+			if (typeof contoller.get(nodeAttrValue) != "undefined") {
+//				domAttr.set(nodeList[node], "value", at(contoller, nodeAttrValue));
+				nodeList[node].set("value", at(contoller, nodeAttrValue));
+			}
+		}
+		
+	};
+	
+	// mvc/Binding: binding Controller with the Model(data store) to View(widget)
+	mvcUtils.bindingModelToWidget = function (model, targetWidget){
+		if ((typeof targetWidget.getChildren == "function") && (targetWidget.getChildren != null)) {
+			targetWidget.getChildren().forEach(function(domNode) {
+				//all mvc html node has a name set to property equal to class field
+				if (typeof model.get(domNode.get("name")) != "undefined") {
+					domNode.set("value", at(model, domNode.get("name")));
+				}
+			});
+		} else {
+			throw new Error("node is not Widget!");
+		}
+		
+	};
+	
+	// mvc/Binding: binding Model(data store) to View
+	mvcUtils.bindingModelToDomNode = function (model, targetWidget){
+		var nodeList = this.findAllNodeHasAttrInTree("name", targetWidget);
+		for (var node = 0; node < nodeList.length; node++) {
+			var nodeAttrValue = domAttr.get(nodeList[node], "name");
+			if (typeof model.get(nodeAttrValue) != "undefined") {
+//				domAttr.set(nodeList[node], "value", at(model, nodeAttrValue));
+				nodeList[node].set("value", at(model, nodeAttrValue));
+			}
+		}
+		
+	};
+	
+	// change the style of input elements in View(widget) to ready only mode
+	mvcUtils.setReadyOnlyAttrsInWidget = function (targetWidget){
+		if ((typeof targetWidget.getChildren == "function") && (targetWidget.getChildren != null)) {
+			targetWidget.getChildren().forEach(function(domNode) {
+				//all mvc html node has a name set to property equal to class field
+				var nodeNameAttr = domNode.get("name");
+				if ((typeof nodeNameAttr != "undefined") && (nodeNameAttr != null)) {
+					domNode.set("readOnly", true);
+				}
+			});
+		} else {
+			throw new Error("node is not Widget!");
+		}
+		
+	};
+	
+	mvcUtils.setReadyOnlyAttrsInDomNode = function (targetWidget){
+		var nodeList = this.findAllNodeHasAttrInTree("name", targetWidget);
+		for (var node in nodeList) {
+			nodeList[node].set("readOnly", true);
+		}
+		
+	};
+	
+	return mvcUtils;
+
+});

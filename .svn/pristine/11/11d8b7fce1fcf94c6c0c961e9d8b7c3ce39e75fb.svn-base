@@ -1,0 +1,10 @@
+/**
+ * 
+ */
+/**
+ * Main Entry Point for js file
+ */
+(function mainEntry () {
+	var myDojo;
+	console.debug("execute iframeInit!");
+})();

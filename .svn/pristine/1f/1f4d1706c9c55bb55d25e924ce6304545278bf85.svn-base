@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>施工单位管理</title>
+
+<style type="text/css">
+@import
+	"http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css"
+	;
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojotoolkit/dojo/resources/dojo.css"
+	;
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/dgrid.css";
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/skins/claro.css"
+	;
+</style>
+<body class="claro">
+<div data-dojo-type="dojo/store/Memory"
+	    data-dojo-id="chk_sureStore"
+	    data-dojo-props="data: [{id: '-1', name: '全部'}, {id: '0', name: '未审核'}, {id: '1', name: '已审核'}]"></div>
+	<span data-dojo-type="dijit.Toolbar"> <input type="button"
+		id="btnAdd" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Add" intermediateChanges="false" label="新增"
+		iconClass="dijitNoIcon"></input> <input type="button"
+		data-dojo-type="dijit.form.Button" tabIndex="-1" id="btnDel"
+		iconClass="Cross" intermediateChanges="false" label="删除"
+		iconClass="dijitNoIcon"></input> <span
+		data-dojo-type="dijit/ToolbarSeparator"></span> <input type="button"
+		data-dojo-type="dijit.form.Button" tabIndex="-1" iconClass="Recordred"
+		intermediateChanges="false" label="审核" iconClass="dijitNoIcon" id='btnCheckSureTrue'></input>
+		<input type="button" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Recordgreen" intermediateChanges="false" label="反审核" id='btnCheckSureFalse'
+		iconClass="dijitNoIcon"></input> <span
+		data-dojo-type="dijit/ToolbarSeparator"></span> 
+		<input  id="cmbchk_sure"
+		data-dojo-type="dijit.form.ComboBox" value="全部" tabIndex="-1"
+		intermediateChanges="false" trim="false" uppercase="false"
+		lowercase="false" propercase="false" invalidMessage="$_unset_$"
+		pageSize="Infinity" searchDelay="200" style="width: 62px;"
+		data-dojo-props="store:chk_sureStore,  searchAttr:'name'">
+		
+			 <input type="button" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Zoom" intermediateChanges="false" id="btnReflash"
+		label="查询"></input> </span>
+	<div class="AffairEntryGrid">
+		<div >
+			<table id="MainGrid"
+				style="min-width: 1em; min-height: 1em; width: 100%;"></table>
+		</div>
+	</div>
+
+
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="myDialog"
+		title="编辑施工单位信息">
+		<div data-dojo-type="dijit/form/Form" id="myForm"
+			data-dojo-id="myForm" encType="multipart/form-data" action=""
+			method="">
+			<table class="dijitDialogPaneContentArea">
+				<tr style="display: none;">
+					<td><label for="id">编号:</label>
+					</td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						readonly="readonly" name="id" id="id">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="assitenCode">助记码:</label>
+					</td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						name="assitenCode" id="assitenCode">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="unitName">施工单位:</label>
+					</td>
+					<td><input data-dojo-type="dijit/form/TextBox" name="unitName"
+						id="unitName">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="linkMan">联系人:</label>
+					</td>
+					<td><input data-dojo-type="dijit/form/TextBox" name="linkMan"
+						id="linkMan">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="tel">联系电话:</label>
+					</td>
+					<td><input data-dojo-type="dijit/form/TextBox" name="tel"
+						id="tel">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="veriCode">验证码:</label>
+					</td>
+					<td><input data-dojo-type="dijit/form/TextBox" name="veriCode"
+						id="veriCode">
+					</td>
+				</tr>
+				<tr>
+					<td><label for="comment">备注:</label>
+					</td>
+					<td><input data-dojo-type="dijit/form/TextBox" name="comment"
+						id="comment">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="dijitDialogPaneActionBar">
+			<button dojoType="dijit.form.Button" type="button"
+				 id="btnModifySubmnit">保存</button>
+			<button dojoType="dijit.form.Button" type="button"
+				onClick="myDialog.onCancel();" id="btnModifyCancel">取消</button>
+		</div>
+	</div>
+</body>
+</html>

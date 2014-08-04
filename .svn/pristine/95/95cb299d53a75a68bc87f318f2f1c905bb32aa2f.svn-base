@@ -1,0 +1,53 @@
+//
+require([ 
+				"dojo/request",
+				"dojo/parser",
+				"dojo/dom",
+				"dojo/dom-attr",
+				"dijit/registry",
+				"dojo/on",
+				"dojo/store/Memory",
+				"dojo/domReady!"
+		], function(request, parser, dom, domAttr, registry, on, Memory){
+
+		var viewScopePrefix = "affair_query";
+	
+		parser.parse(this).then(function(){
+				var affairEntryGrid = registry.byId(viewScopePrefix + "-" + "affairEntryGrid");
+				var affairEntryFilterPanel = registry.byId(viewScopePrefix + "-" + "affairEntryFilterPanel");
+				
+				affairEntryGrid.on(".dgrid-cell:click", function(evt){
+				    //var cell = grid.cell(evt);
+				    
+				    // cell.element == the element with the dgrid-cell class
+				    // cell.column == the column definition object for the column the cell is within
+				    // cell.row == the same object obtained from grid.row(evt)
+				});
+				
+				// mvc/Event: submit the data in form
+				on(dom.byId(viewScopePrefix + "-" + "submitBtn"), "click", function() {
+					var affairEntryFilter = affairEntryFilterPanel.submitToEntity();
+					affairEntryGrid.refreshByQueryEntity(affairEntryFilter);
+				});
+
+				// mvc/Event: reset the data in form to default
+				on(dom.byId(viewScopePrefix + "-" + "cleanBtn"), "click", function() {
+					affairEntryFilterPanel.clean();
+				});
+
+				// mvc/Event: revert the original data to model and them to form
+				on(dom.byId(viewScopePrefix + "-" + "undoBtn"), "click", function() {
+					affairEntryFilterPanel.undo();
+				});
+								
+				// mvc/Event: restore the new data to model and them to form
+				on(dom.byId(viewScopePrefix + "-" + "redoBtn"), "click", function() {
+					affairEntryFilterPanel.redo();
+				});
+								
+			});
+			
+		}, function(error) {
+			console.log("An error occurred: " + error);
+	});
+

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>main entry for affair management widgets test suite</title>
+
+<script type="text/javascript">
+	require([ 
+				"dijit/layout/ContentPane",
+				"affair_mngt/embedded_widgets/AffairEntryForm",
+				"affair_mngt/embedded_widgets/AffairEntryDetailForm",
+				"affair_mngt/embedded_widgets/AffairEntryFilterPanel",
+				"affair_mngt/embedded_widgets/CustomerInfoViewer",
+				"affair_mngt/embedded_widgets/OperationHistoryGrid"
+	        ]);
+</script>
+
+<script type="text/javascript">
+	var defaultAffairEntry;
+	var defaultAffairEntryDetail;
+	var affairEntryFilter;
+	var defaultCustomerInfo;
+		
+	require([ 
+				"dojo/request",
+				"dojo/parser",
+				"dojo/dom",
+				"dojo/dom-attr",
+				"dijit/registry",
+				"dojo/on",
+				"dojo/store/Memory",
+				"dojo/domReady!"
+	        ], function(request, parser, dom, domAttr, registry, on, Memory){
+		
+        operateHistoryStore = new Memory({
+			data : [
+			    {"operateStep":"1","operateTime":1363525471081,"operator":{"id":1,"departments":[]}},
+			    {"operateStep":"2","operateTime":1363545471083,"operator":{"id":1,"departments":[]}},
+			    {"operateStep":"2","operateTime":1363535471082,"operator":{"id":1,"departments":[]}},
+			    {"operateStep":"3","operateTime":1363595471084,"operator":{"id":1,"departments":[]}},
+			    {"operateStep":"3","operateTime":1363555471084,"operator":{"id":1,"departments":[]}},
+			    {"operateStep":"3","operateTime":1363575471084,"operator":{"id":1,"departments":[]}},
+			    {"operateStep":"4","operateTime":1363565471085,"operator":{"id":1,"departments":[]}},
+//			    {"operateStep":"5","operateTime":1363575471086,"operator":{"id":1,"departments":[]}},
+			],
+			idProperty: 'operateStep'
+		});
+        
+		// load default entity value from json
+		request.get("../common/entity/affairEntry.json", {
+			sync : true,
+			timeout : 2000,
+			// Parse data from JSON to a JavaScript object
+			handleAs : "json"
+		}).then(function(affairEntryJson) {
+// 			defaultAffairEntry = affairEntryJson.defaultValue;
+			defaultAffairEntry = affairEntryJson.detailValue;
+			defaultAffairEntryDetail = defaultAffairEntry.affairEntryDetail;
+			defaultCustomerInfo =  defaultAffairEntry.associatedCustomer;
+			
+
+			parser.parse().then(function(){
+				var affairEntryForm = registry.byId("affairEntryForm");
+				var affairEntryDetailForm = registry.byId("affairEntryDetailForm");
+				var affairEntryFilterPanel = registry.byId("affairEntryFilterPanel");
+				
+				// mvc/Event: submit the data in form
+				on(dom.byId("submitBtn"), "click", function() {
+					var entity = affairEntryForm.submitToEntity();
+					var entityDetail = affairEntryDetailForm.submitToEntity();
+					console.debug("returned entity: " + entity.arisesArea);
+					console.debug("returned entityDetail: " + entityDetail.subject);
+					var affairEntryFilter = affairEntryFilterPanel.submitToEntity();
+					console.debug("returned affairEntryFilter.operateState: " + affairEntryFilter.operateState);
+				});
+
+				// mvc/Event: rebase new data to form
+				on(dom.byId("rebaseBtn"), "click", function() {
+					defaultAffairEntry.arisesArea = "浙江HY";
+					affairEntryForm.rebaseFromEntity(defaultAffairEntry);
+					defaultAffairEntryDetail.subject = "教练项目";
+					affairEntryDetailForm.rebaseFromEntity(defaultAffairEntryDetail);
+				});
+                
+				// mvc/Event: reset the data in form to default
+				on(dom.byId("cleanBtn"), "click", function() {
+					affairEntryForm.clean();
+					affairEntryDetailForm.clean();
+				});
+
+				// mvc/Event: revert the original data to model and them to form
+				on(dom.byId("undoBtn"), "click", function() {
+					affairEntryForm.undo();
+					affairEntryDetailForm.undo();
+					affairEntryFilterPanel.undo();
+				});
+								
+				// mvc/Event: restore the new data to model and them to form
+				on(dom.byId("redoBtn"), "click", function() {
+					affairEntryForm.redo();
+					affairEntryDetailForm.redo();
+					affairEntryFilterPanel.redo();
+				});
+								
+			});
+			
+		}, function(error) {
+			console.log("An error occurred: " + error);
+		});
+	});
+
+</script>
+
+<style>
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/document.css";
+	@import "http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css";
+	@import "../common/resource/style/main.css";
+	@import "../embedded_widgets/themes/OperationHistoryGrid.css";
+</style>
+
+</head>
+
+<body class="claro">
+    <div class='claro'>	-----	begin of main area for iframe	-----	</div>
+    	<p>main area for testing</p>
+    	<div id="affairEntryForm" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryForm" 
+    		data-dojo-id="affairEntryForm"
+    		data-dojo-props="defaultValueOfEntity: defaultAffairEntry" ></div>
+    	<div id="affairEntryDetailForm" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryDetailForm" 
+    		data-dojo-id="affairEntryDetailForm"
+    		data-dojo-props="defaultValueOfEntity: defaultAffairEntryDetail" ></div>
+    	<div class='claro' id="affairEntryFilterPanel" data-dojo-type="affair_mngt/embedded_widgets/AffairEntryFilterPanel" 
+    		data-dojo-id="affairEntryFilterPanel" ></div>
+    	<div id="customerInfoViewer" data-dojo-type="affair_mngt/embedded_widgets/CustomerInfoViewer" 
+    		data-dojo-id="customerInfoViewer"
+    		data-dojo-props="defaultValueOfEntity: defaultCustomerInfo" ></div>
+    	<div id="AffairOperateHistoryPane" data-dojo-type="affair_mngt/embedded_widgets/OperationHistoryGrid" 
+    		data-dojo-id="AffairOperateHistoryPane"
+    		data-dojo-props="operationHistoryStore: operateHistoryStore" ></div>
+		<div style="clear: both;"></div>
+		<div style="text-align: left; padding-left: 30px;">
+			<input id="submitBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="提交(submit)" iconClass="dijitNoIcon"> 
+			<input id="rebaseBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="重设(rebase)" iconClass="dijitNoIcon"> 
+			<input id="cleanBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="清空(clean)" iconClass="dijitNoIcon"> 
+			<input id="undoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="取消(undo)" iconClass="dijitNoIcon">
+			<input id="redoBtn" type="button" data-dojo-type="dijit/form/Button" intermediateChanges="false" label="恢复(redo)" iconClass="dijitNoIcon">
+		</div>
+    <div class='claro'>	-----	end of main area for iframe	-----	</div>
+</body>
+
+</html>

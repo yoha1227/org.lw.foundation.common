@@ -1,0 +1,384 @@
+require([ "dojox3rd/restfulstub/CrudableRestfulStubAsStore", "dijit/dijit",
+		"dojo/parser", "dojo/dom", "dojox/io/xhrScriptPlugin",
+
+		"dojo/data/ItemFileWriteStore", "dgrid/Grid",
+		"dgrid/extensions/Pagination",
+		"affairService/affairSummaryDtoStubAsStore", "dojo/date/locale",
+		"dgrid/Selection", "dgrid/editor", "dgrid/selector",
+
+		"dijit/Toolbar", "dijit/ToolbarSeparator", "dijit/form/Button",
+		"dijit/form/ComboBox", "dojox/grid/_CheckBoxSelector",
+		"dojox/grid/cells", 'dojo/date/stamp', 'dojo/date/locale',
+		"dojo/window", "dijit/Dialog", "dijit/form/TextBox",
+		"dijit/form/Button", "dojox/form/BusyButton", "dijit/form/Form",
+		"dojo/_base/array", "dijit/form/CheckBox",
+		"dijit/form/ValidationTextBox", "dijit/layout/BorderContainer",
+		"dijit/layout/ContentPane" ], function(CrudableRestfulStubAsStore,
+		dijit, parser, dom, xhrScriptPlugin, ItemFileWriteStore, OnDemandGrid,
+		Pagination, affairSummaryDtoStubAsStore, dateLocal, Selection, editor,
+		selector) {
+	parser.parse(this).then(
+			function() {
+				function dateTimeFormatter(item, value, node) {
+					if (value) {
+						node.innerHTML = dateLocal.format(new Date(value), {
+							datePattern : "yyyy-MM-dd",
+							timePattern : "HH:mm:ss"
+						});
+					}
+				}
+				function chk_sureFormatter(item, value, node) {
+					if (value == "1") {
+						node.innerHTML = "是";
+					} else {
+						node.innerHTML = "否";
+					}
+				}
+
+				var grid;
+				var gridStore;
+				gridStore = new CrudableRestfulStubAsStore(
+						"/dmpServer/resteasy/matUnit/", 2000).getMvcStore();
+
+				// gridStore=Observable(new Store({ idProperty: "summary" }));
+
+				// gridStore=Observable(new Store({ idProperty: "summary" }));
+
+				var structure = {
+					// selected : editor({
+					// label : " ",
+					// autoSave: false,
+					// sortable : false
+					// }, "checkbox"),
+					selected : selector({
+						label : " ",
+						selectorType : "checkbox"
+					}),
+					id : {
+						field : 'id',
+						label : 'id'
+					// 禁止排序
+					},
+					assitenCode : {
+						field : 'assitenCode',
+						label : '助记码'
+					},
+					unitName : {
+						field : 'unitName',
+						label : '施工单位'
+					},
+					linkMan : {
+						field : 'linkMan',
+						label : '联系人'
+					},
+					tel : {
+						field : 'tel',
+						label : '联系方式'
+					},
+					crdate : {
+						field : 'crdate',
+						label : '创建时间',
+						renderCell : dateTimeFormatter
+					},
+					crname : {
+						field : 'crname',
+						label : '创建人'
+					},
+					crdate : {
+						field : 'chk_date',
+						label : '审核时间',
+						renderCell : dateTimeFormatter
+					},
+					crname : {
+						field : 'chk_name',
+						label : '审核人'
+					},
+					chk_sure : {
+						field : 'chk_sure',
+						label : "审核",
+						renderCell : chk_sureFormatter
+
+					},
+					veriCode : {
+						field : 'veriCode',
+						label : '验证码'
+					},
+					comment : {
+						field : 'comment',
+						label : '备注'
+					},
+					timestamp : {
+						field : 'timestamp'
+					}
+
+				};
+
+				grid = new (dojo.declare([ OnDemandGrid, Pagination, Selection,
+						editor ]))({
+					// selectionMode : "single",// 设置为只能单行选择
+					store : gridStore, // 数据集
+					columns : structure, // 列
+					pagingLinks : true, //
+					pagingTextBox : true, //
+					firstLastArrows : false, //
+
+					pageSizeOptions : [ 20, 30, 50, 100, 200 ],
+					// height: 'auto',
+					rowsPerPage : 20,
+					// query:{ "id": 9 }, //筛选数据
+					sort : "id", // 默认排序
+
+					loadingMessage : "正在努力加载中，请稍等！"
+
+				}, dom.byId("MainGrid"));
+
+				grid.styleColumn("selected", "width:30px");
+				grid.styleColumn("id", "width:60px");
+				grid.styleColumn("assitenCode", "width:60px");
+				grid.styleColumn("unitName", "width:200px");
+				grid.styleColumn("linkMan", "width:60px");
+				grid.styleColumn("timestamp", "display:none");
+				grid.styleColumn("timestamp", "display:none");
+				grid.styleColumn("timestamp", "display:none");
+				grid.startup();
+				// grid.set("sort", "assitenCode", true);// 默认排序
+				// grid.query = { "id": 9 };
+
+				// 绑定工具栏方法
+				dojo.connect(dijit.byId("btnAdd"), "onClick", function(event) {
+					myForm.reset();// 清空数据
+					myDialog.show();
+				});
+
+				dojo.connect(dijit.byId("btnCheckSureTrue"), "onClick",
+						function(event) {
+							var bFlag = false;
+							var datastr = "";
+							for ( var i in grid.selection) {
+								var row = grid.row(i).data;
+								row.chk_sure = 1;
+								if (datastr != "") {
+									datastr += ","
+								}
+								datastr += dojo.toJson(row, true);
+
+								// UpdateCheckSure(grid, "1", row);
+
+								bFlag = true;
+							}
+
+							UpdateCheckSure(grid, "[" + datastr + "]", true);
+							if (bFlag == false) {
+								alert("请选择行");
+
+							} else {
+
+							}
+
+						});
+
+				dojo.connect(dijit.byId("btnCheckSureFalse"), "onClick",
+						function(event) {
+							var bFlag = false;
+							var datastr = "";
+							for ( var i in grid.selection) {
+								var row = grid.row(i).data;
+								row.chk_sure = 0;
+								if (datastr != "") {
+									datastr += ","
+								}
+								datastr += dojo.toJson(row, true);
+
+								// UpdateCheckSure(grid, "1", row);
+
+								bFlag = true;
+							}
+
+							UpdateCheckSure(grid, "[" + datastr + "]", false);
+							if (bFlag == false) {
+								alert("请选择行");
+
+							} else {
+
+							}
+						});
+
+				dojo.connect(dijit.byId("btnReflash"), "onClick", function(
+						event) {
+					var strQuery = {};
+					var chk_sure = dijit.byId("cmbchk_sure").get('value');
+					if (chk_sure == '已审核') {
+						strQuery = {
+							"chk_sure" : 1
+						};
+					} else if (chk_sure == '未审核') {
+						strQuery = {
+							"chk_sure" : 0
+						};
+					}
+					grid.query = strQuery;
+					grid.refresh();
+				});
+
+				dojo.connect(dijit.byId("btnModifySubmnit"), "onClick",
+						function(event) {
+							UpdateRecord(grid);
+						});
+
+				grid.on(".dgrid-row:dblclick", function(evt) {
+					var row = grid.row(evt);
+
+					item = row.data;
+					myForm.reset();// 清空数据
+					myForm.setValues(item);
+					myDialog.show();
+				});
+
+				dojo.connect(dijit.byId("btnDel"), "onClick", function(event) {
+
+					DelRecord(grid, gridStore);
+
+				});
+
+			});
+});
+
+// 审核与反审
+function UpdateCheckSure(grid, data, checkFlag) {
+
+	// var data = myForm.getValues();
+	var xhrArgs = {
+		url : "/dmpServer/resteasy/matUnit/UpdateChkSure/",
+		contentType : 'application/json;charset=UTF-8',
+		putData : data,
+		handleAs : "json",
+		load : function(response) {
+			if (checkFlag) {
+				alert("审核成功");
+			} else {
+				alert("反审核成功");
+			}
+
+			grid.clearSelection(); // 取消选择
+			grid.gotoPage(grid._currentPage);
+		},
+		error : function(error) {
+			alert("保存失败，请您重试!");
+		}
+	};
+
+	var deferred = dojo.xhrPut(xhrArgs);
+
+};
+
+// 保存，更新
+function UpdateRecord(grid) {
+
+	if (myForm.validate() == false) {
+		return;
+	}
+	btnModifySubmnit.disabled = true;
+
+	var record = myForm.getValues();
+	if (record.id != '') {// 更新
+		var xhrArgs = {
+			url : "/dmpServer/resteasy/matUnit/" + record.id,
+			contentType : 'application/json;charset=UTF-8',
+			putData : dojo.toJson(record, true),
+			handleAs : "json",
+			load : function(data) {
+				alert("恭喜您，保存成功!");
+				// gridStore.newItem(record);
+				myDialog.onCancel();
+				grid.clearSelection(); // 取消选择
+				grid.gotoPage(grid._currentPage);
+			},
+			error : function(error) {
+				alert("保存失败，请您重试!");
+
+			}
+		};
+
+		var deferred = dojo.xhrPut(xhrArgs);
+	} else {// 新增
+		var xhrArgs = {
+			url : "/dmpServer/resteasy/matUnit/",
+			putData : dojo.toJson(record, true),
+			contentType : 'application/json;charset=UTF-8',
+			handleAs : "json",
+			load : function(data) {
+				alert("恭喜您，保存成功!");
+				myDialog.onCancel();
+				grid.clearSelection(); // 取消选择
+				grid.gotoPage(grid._currentPage);
+			},
+			error : function(error) {
+				alert("保存失败，请您重试!");
+			}
+		};
+
+		var deferred = dojo.xhrPost(xhrArgs);
+
+	}
+	grid.refresh();
+};
+
+// 删除
+function DelRecord(grid, gridStore) {
+
+	var idList = "";
+	var idDeleteFlag = "";
+	for ( var i in grid.selection) {
+
+		var row = grid.row(i);
+
+		if (row.data.chk_sure == 1) {
+			if (idDeleteFlag != "") {
+				idDeleteFlag += ",";
+			}
+			idDeleteFlag += row.data.id;
+		}
+
+		if (idList != "") {
+			idList += ",";
+		}
+		idList += row.data.id;
+	}
+
+	if (idList == "") {
+		alert("请选择行");
+		return;
+	}
+
+	if (idDeleteFlag != "") {
+		alert("已审核的不能被删除，请核对id：" + idDeleteFlag);
+		return;
+	}
+	// for ( var i in grid.selection) {
+	// gridStore.remove(i);
+	// }
+
+	if (!confirm("删除之后，将无法恢复，确认删除吗？")) {
+		return;
+	}
+
+	var xhrArgs = {
+		url : "/dmpServer/resteasy/matUnit/delete/" + idList,
+		contentType : 'application/json;charset=UTF-8',
+		handleAs : "json",
+		load : function(data) {
+			alert("删除成功!");
+
+			grid.clearSelection(); // 取消选择
+			grid.gotoPage(grid._currentPage);
+
+		},
+		error : function(error) {
+			alert("删除失败，请您重试!");
+		}
+	};
+	// dojo.byId("response2").innerHTML =
+	// "Message being sent..."
+	// Call the asynchronous xhrPost
+	var deferred = dojo.xhrDelete(xhrArgs);
+};

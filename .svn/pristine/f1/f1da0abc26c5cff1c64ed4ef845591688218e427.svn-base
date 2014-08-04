@@ -1,0 +1,132 @@
+define(
+		"dojox3rd/widget_template/SimpleEntityReadOnlyViewer",
+		[ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			"dojo/text!./templates/SimpleEntityReadOnlyViewer.html",
+			// should import follow module otherwise will thrown "dijit.byid error"
+			"dijit/_base/manager",
+			// import modules used by our widget:
+			"dijit/registry",
+			"dojo/dom",
+			"dojo/dom-attr",
+			"dojo/Stateful",
+			"dojox/mvc/at",
+			"dojox/mvc/getPlainValue",
+			"dojox/mvc/ModelRefController",
+			"dojox3rd/mvc/mvcUtils",
+			"dojo/on",
+			"dojo/Evented",
+			"dojo/_base/lang",
+			"dijit/form/Form",
+			"dijit/form/TextBox",
+			"dijit/form/Textarea"
+		],
+		function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templateStr, 
+				dijit_manager, registry, dom, domAttr, Stateful, at, getPlainValue, ModelRefController, mvcUtils,
+				on, Evented, lang ) {
+	    	
+			return dojo.declare("dojox3rd.widget_template.SimpleEntityReadOnlyViewer",
+					[ _WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin ], {
+						// Path to the template
+						templateString : null,
+
+						//define our attribute variables here:
+				        defaultValueOfEntity : null,
+						bindingModel : null,		// mvc: Model
+						bindingController : null,	// mvc: Controller
+						targetFormWidget : null,	// mvc: View
+												
+				        _setDefaultValueOfEntityAttr : function(/*Object*/ defaultValueOfEntity){
+				        	this._set("defaultValueOfEntity", defaultValueOfEntity);
+				        },
+						
+				        _setBindingModelAttr : function(/*Object*/ bindingModel){
+				        	this._set("bindingModel", bindingModel);
+				        },
+						
+				        _setBindingControllerAttr : function(/*Object*/ bindingController){
+				        	this._set("bindingController", bindingController);
+				        },
+						
+				        // define our widget functions:
+						rebaseFromEntity : function(sourceEntity) {
+							
+//							this.bindingController.sourceModel = new Stateful(sourceEntity);
+							mvcUtils.copyEntityDataToModel(sourceEntity, this.bindingController.model);
+							
+							// mvc/Event: revert/restore the data from sourceModel to model and them to form
+//							this.bindingController.reset();
+						},
+						
+						
+				        // Override this method to perform custom behavior during dijit construction.
+						// Common operations for constructor:
+						// 1) Initialize non-primitive types (i.e. objects and arrays)
+						// 2) Add additional properties needed by succeeding lifecycle methods
+						constructor : function() {
+							
+						},
+
+						// When this method is called, all variables inherited from superclasses are 'mixed in'.
+						// Common operations for postMixInProperties
+						// 1) Modify or assign values for widget property variables defined in the template HTML file
+						postMixInProperties : function() {
+							if (this.templateString == null) {
+								this.templateString = templateStr;
+							}
+						},
+
+						// postCreate() is called after buildRendering().  This is useful to override when 
+						// you need to access and/or manipulate DOM nodes included with your widget.
+						// DOM nodes and widgets with the dojoAttachPoint attribute specified can now be directly
+						// accessed as fields on "this". 
+						// Common operations for postCreate
+						// 1) Access and manipulate DOM nodes created in buildRendering()
+						// 2) Add new DOM nodes or widgets 
+						postCreate : function() {
+							
+							// "this" pointer maybe changed to html not this widget after registry.byid called 
+							var _thisWidget = this;
+							
+							var formNode;
+							for (var node in this.domNode.childNodes) {
+								if (this.domNode.childNodes[node].nodeName == "FORM") {
+									formNode = this.domNode.childNodes[node];
+									break;
+								}
+							}
+							
+							_thisWidget.targetFormWidget = registry.byId(domAttr.get(formNode, "widgetid"));
+
+							if (_thisWidget.bindingController == null) {
+								if (_thisWidget.bindingModel == null) {
+									if (_thisWidget.defaultValueOfEntity == null) {
+										// assembly a default entity prototype (for Model) from View(widget)
+										var emptyEntity = mvcUtils.assemblyEntityPrototypeFromWidget(_thisWidget.targetFormWidget);
+
+										// mvc/Model: create the empty data store
+										_thisWidget.defaultValueOfEntity = emptyEntity;
+										_thisWidget.bindingModel = new Stateful(_thisWidget.defaultValueOfEntity);
+									} else {
+										// mvc/Model: create the data store using default entity
+										_thisWidget.bindingModel = new Stateful(_thisWidget.defaultValueOfEntity);
+									}
+								}
+								
+								// mvc/Controller: create the Controller
+								_thisWidget.bindingController =  new ModelRefController({
+									model : _thisWidget.bindingModel
+								});
+							}
+
+							// mvc/Binding: binding Model(data store) to View and Controller
+							mvcUtils.bindingControllerWithModelToWidget(_thisWidget.bindingController, _thisWidget.targetFormWidget);
+
+							// change the style of input elements in View(widget) to ready only mode
+							mvcUtils.setReadyOnlyAttrsInWidget(_thisWidget.targetFormWidget);
+						}
+						
+					});
+		});

@@ -1,0 +1,881 @@
+@CHARSET "UTF-8";
+/*
+ @import "../js/Dojo/dijit/themes/claro/claro.css";
+ @import "../js/Dojo/dijit/themes/claro/document.css";
+ @import "../js/Dojo/dojo/resources/dojo.css";
+ @import "../js/Dojo/dojox/widget/Calendar/Calendar.css";
+
+@import "suntang/document.css";
+@import "suntang/claro.css";
+ */
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: "宋体";
+    font-size: 12px;
+}
+* {
+    padding: 0;
+    margin: 0;
+}
+
+input {
+    background: #FFFFFF;
+    font-size: 12px;
+    padding: 3px;
+    border: 1px solid #c3c3c3;
+    color: #646464;
+}
+
+select {
+    background: #FFFFFF;
+    font-size: 12px;
+    padding: 3px;
+    border: 1px solid #c3c3c3;
+    color: #646464;
+}
+
+a{text-decoration:none;}
+/*a:link{color:#009;}
+a:visited{color:#800080;}
+a:hover,a:active,a:focus{color:#c00;}*/
+
+.clear-float:after {
+    content: '\20';
+    display: block;
+    height: 0;
+    clear: both;
+    overflow: hidden;
+    visibility: hidden;
+}
+
+.clear-float {
+    zoom: 1;
+}
+
+html body div.clear, html body span.clear {
+    background: none;
+    border: 0;
+    clear: both;
+    display: block;
+    float: none;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
+
+.table{
+    display: table;
+}
+.table-row{
+    display: table-row;
+}
+.table-cell{
+    display: table-cell;
+}
+
+ul {
+    list-style: none;
+}
+
+.ib {
+    display: inline-block;
+}
+
+.hidden{
+    display: none;
+}
+
+.cur {
+    color: #0f0f0f;
+}
+
+.TA-c{
+    text-align: center;
+}
+.TA-r{
+    text-align: right;
+}
+.TA-l{
+    text-align: left;
+}
+
+.VA-m{
+    vertical-align: middle;
+}
+.VA-t{
+    vertical-align: top;
+}
+.VA-b{
+    vertical-align: bottom;
+}
+
+.full-width{
+    width: 100%;
+}
+.full-height{
+    height: 100%;
+}
+/*
+ .inline{
+ display:inline-block;
+ width:auto;
+ padding:1px 2px;
+ border:#303030 solid 1px;
+ }
+ */
+.headbox {
+    background: url(../images/head_02.png) repeat-x;
+    width: 100%;
+    height: 60px;
+}
+
+.headbox li {
+    height: 60px;
+}
+
+.headbox .log {
+    width: 180px;
+    background: url(../images/headico.png) no-repeat center;
+}
+
+.headbox .name {
+    font-size: 28px;
+    vertical-align: middle;
+    color: #e9f2f4;
+    font-family: "黑体", "微软雅黑";
+    margin-top: -40px;
+    letter-spacing: 0.2em;
+}
+
+.header .spliter {
+    height: 2px;
+    width: 100%;
+    background: #ff6d29;
+    font-size: 1px;
+}
+
+.header .info {
+    background: url(../images/head_05.png) repeat-x;
+    width: 100%;
+    height: 20px;
+    color: #AEC7E9;
+}
+
+.header .info .left {
+    padding-left: 20px;
+    float: left;
+}
+
+.header .info .location {
+    padding-left: 50px;
+    float: left;
+}
+
+.header .info .operation {
+    float: right;
+}
+
+.header .info .operation a {
+    color: #AEC7E9;
+}
+
+.footer {
+    background: #e0e0e2;
+}
+
+.footer div {
+    text-align: center;
+    vertical-align: middle;
+    height: 35px;
+    line-height: 35px;
+    overflow: hidden;
+    color: #0089CC;
+}
+
+.tabBorder {
+}
+
+.commonBox {
+    padding : 2px;
+    margin : 4px 0;
+}
+
+/*标签页*/
+.tabContainer {
+background: #bebebe;
+}
+
+.tabContainer .dijitTabContainerBottom-container, .tabContainer .dijitTabContainerTop-container, .tabContainer .dijitTabContainerLeft-container, .tabContainer .dijitTabContainerRight-container {
+    border: none;
+}
+
+.tabContainer .dijitTabContent {
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.tabContainer .dijitTabContainerTop-tabs {
+    /* border-bottom-width: 0;*/
+}
+
+.padding_0 {
+    padding: 0 !important;
+}
+
+.dataGridClass {
+    width: 100%;
+    height: 100%;
+    font-size: 12px;
+}
+
+.dataGridClass .header_grid {
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+.dataGridClass .header_grid .dojoxGridSortNode {
+    background: url(../images/tabline.gif) repeat-x !important;
+}
+
+.dataGridClass .cell_grid {
+    height: 30px;
+    text-align: center;
+}
+
+.dataGridClass .cell_left {
+    text-align: left;
+}
+
+.dataGridClass .cell_right {
+    text-align: right
+}
+
+.dataGridClass .color_gray {
+    color: #666;
+    font-family: "宋体";
+    font-size: 12px;
+}
+
+.dataGridClass .color_green {
+    color: green;
+}
+
+.dataGridClass .dojoxGridRowOdd .dojoxGridRowTable tr, .dataGridClass .dojoxGridRowOdd .dojoxGridRowTable tbody tr {
+    background: #f5f6f7;
+}
+
+.pager {
+    height: 30px;
+    background: #EDECEC;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 30px;
+}
+
+.pager a {
+    color: #343434;
+    padding: 2px 4px;
+    font-size: 14px;
+}
+
+.pager a:hover {
+    color: #1478AF;
+}
+
+.pager a.cur {
+    color: #1478AF;
+}
+
+.center{
+    margin : 0 auto;
+}
+.loginForm{
+    padding-top : 18%;
+}
+.loginForm ul{
+    width : 200px;
+}
+.loginForm ul li{
+    float : left;
+    text-align:center;
+    margin : 5px 0;
+}
+.loginForm ul li.desc{
+    width : 40%;
+    text-align : right;
+}
+.loginForm ul li.input{
+    width : 55%;
+    text-align : left;
+}
+
+.puboptabList .dijitTab .dijitTabInnerDiv .dijitTabContent .tabLabel {
+    color: #000000;
+    font-size: 12px;
+}
+
+.dojoxGridCell {
+    font-size: 12px;
+    text-decoration: none;
+    color: #009;
+    height: 30px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.dojoxGridCell a:link {
+    color: #5d5d5d;
+    padding: 2px 4px;
+    font-size: 12px;
+}
+
+.dojoxGridCell a:hover {
+    color: #1478AF;
+    text-decoration: underline;
+}
+
+.dojoxGridCell a:visited {
+    color: #1478AF;
+}
+
+/*详情样式*/
+.opinionDetails {
+    width: 100%;
+}
+
+.opinionDetails .head {
+    font-size: 14px;
+    font-weight: bold;
+    font-family: "宋体";
+    color: #fff;
+    line-height: 30px;
+    background-image: url(../images/tabline3.gif);
+    text-indent: 20px;
+}
+
+.opinionDetails .Display {
+    background-color: #fff;
+    margin: 0px;
+    padding: 10px;
+    color: #000;
+}
+.opinionDetails .Display .divContainer .jumpLink li {
+    background-image: url(../images/edit_05.gif);
+    border: 1px solid #4081af;
+    margin: 5px;
+    padding: 2px;
+    color: #000;
+    text-align: center;
+}
+.opinionDetails .Display .divContainer .jumpLink li a:visited {
+     color: #5188d3;
+}
+.opinionDetails .container Display ul {
+    margin: 15px;
+}
+/**
+.opinionDetails .Display div {
+    background: url(weather.jpg) no-repeat -5px 0px;
+    margin: 0px 5px 0px 5px;
+    background-color: #5ea6eb;
+}
+*/
+.opinionDetails .Display h3 {
+    border: 1px solid #AFAFAF;
+    font-size: 12px;
+    padding: 5px;
+    color: #000;
+    font-weight: bold;
+    margin: 0px;
+    background-image: url(../images/tabline2.gif);
+}
+
+.opinionDetails .Display .title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #585920;
+}
+
+.opinionDetails .Display .datalist {
+    /* 表格边框 */
+    border-collapse: collapse;
+    font-family: Arial;
+    background-color: #bebebe; /* 表格背景色 */
+    font-size: 12px;
+    width: 100%;
+}
+
+.opinionDetails .Display .datalist th {
+    border: 1px solid #999999; /* 行名称边框 */
+    background-color: #f4f4f4; /* 行名称背景色 */
+    color: #5188d3; /* 行名称颜色 */
+    text-align: center;
+    padding: 5px;
+    background-image: url(../images/tabline1.gif);
+    background-position: center center;
+    background-repeat: repeat-x;
+}
+
+.opinionDetails .Display .datalist td {
+    border: 1px solid #AFAFAF; /* 单元格边框 */
+    text-align: left;
+    background-color: #fff;
+    color: #888888;
+    padding: 4px;
+}
+
+.opinionDetails .Display .datalist td.altrow {
+    background-color: #fafafa;
+}
+
+.opinionDetails .Display .datalist tr.altrow {
+    background-color: #F0F0F0; /* 隔行变色 */
+}
+.opinionDetails .Display .datalist td.selected {/* 选中,变色 */
+    font-weight:bold;
+    color: #0f0f0f; 
+}
+
+
+/*3级详情*/
+
+.ThirdopinionDetails {
+    width: 100%;
+}
+
+.ThirdopinionDetails .head {
+    font-size: 14px;
+    font-weight: bold;
+    font-family: "宋体";
+    color: #fff;
+    line-height: 30px;
+    background-image: url(../images/tabline3.gif);
+    text-indent: 20px;
+}
+
+.ThirdopinionDetails .Display {
+    background-color: #fff;
+    margin: 0px;
+    padding: 10px;
+    color: #000;
+}
+
+.ThirdopinionDetails .Display h3 {
+    border: 1px solid #024dd0;
+    font-size: 12px;
+    padding: 5px;
+    color: #fff;
+    font-weight: bold;
+    margin: 0px;
+    background-image: url(../images/tabline4.gif);
+}
+
+.ThirdopinionDetails .Display .title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #585920;
+}
+
+.ThirdopinionDetails .Display .datalist {
+    /* 表格边框 */
+    border-collapse: collapse;
+    font-family: Arial;
+    background-color: #bebebe; /* 表格背景色 */
+    font-size: 12px;
+    width: 100%;
+}
+.ThirdopinionDetails .Display .datalist .detailTitle {
+    width:100px;
+}
+.ThirdopinionDetails .Display .datalist th {
+    border: 0px solid #999999; /* 行名称边框 */
+    background-color: #fff; /* 行名称背景色 */
+    color: #5188d3; /* 行名称颜色 */
+    text-align: right;
+    padding: 5px;
+    /*background-image: url(../images/tabline4.gif);*/
+}
+
+.ThirdopinionDetails .Display .datalist td {
+    border: 0px solid #AFAFAF; /* 单元格边框 */
+    text-align: left;
+    background-color: #fff;
+    color: #888888;
+    padding: 4px;
+}
+
+.ThirdopinionDetails .Display .datalist td.altrow {
+    background-color: #fafafa;
+}
+
+.ThirdopinionDetails .Display .datalist tr.altrow {
+    background-color: #F0F0F0; /* 隔行变色 */
+}
+/*3级详情结束*/
+
+
+/*快捷菜单开始*/
+.shortcutPanel{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index:999998;
+    height: auto;
+    opacity: 0.7;  //-moz-opacity:0.7; ff和oper等浏览器下的半透明
+    filter:alpha(opacity=70); //IE下的半透明 
+    font-size: 12px;
+}
+.controlButtons{
+    margin-right: -4px;
+}
+.out{
+    /*
+top: 5px;
+    right: 0px;
+*/
+}
+.closs{
+    position: absolute;
+    top: 5px;
+    right: 3px;
+    z-index:999999;
+    display: none;
+}
+.special {
+    background:#FFF url(../images/special_bg.gif) repeat-y;
+    width:200px;
+    margin:3px 0;
+    font-size: 12px;
+    border: 1px solid #9db2d0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.special ul {
+    clear:both;
+    /*background:url(../images/special_ul_bg.gif) no-repeat center bottom;*/
+    list-style:none;
+}
+.special li {
+    background:url(../images/special_b.gif) no-repeat left center;
+    text-indent:20px;
+    margin-left:23px;
+    width:159px;
+    border-bottom:1px dotted #b9d0d6;
+    line-height:24px;
+    float: left;
+}
+.special li a:link {
+    color:#46626a;
+}
+.special li a:visited {
+    color:#46626a;
+}
+.special li a:hover {
+    color:#46626a;
+}
+
+.head li a:link {
+    color:#004c94;
+}
+.head li a:visited {
+    color:#004c94;
+}
+.head li a:hover {
+    color:#002f77;
+}
+/*快捷菜单结束*/
+
+
+/*搜索*/
+.search .datalist {
+    border: 1px solid #AFAFAF;
+    width: 100%;
+    background-color: #f6f6f8;
+    border: 1px solid #d3d5d7;
+    position: relative;
+}
+
+.search .datalist th {
+    color: #333333;
+    text-align: right;
+    font-size: 12px;
+    width: 150px;
+}
+
+.search .datalist td {
+    text-align: left;
+    color: #666666;
+    padding: 4px;
+}
+
+.searchinput {
+    font-size: 12px;
+}
+
+.bigbt {
+    background-image: url(../images/bg.gif);
+    background-color: transparent;
+    border: medium none;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 12px;
+    height: 22px;
+    vertical-align: middle;
+    width: 89px;
+}
+
+/*
+.bigbt.open {
+    background-image: url(../images/butt2.gif);
+    width:17px;
+    height:17px;
+}
+*/
+.bigbt.out {
+    background-image: url(../images/butt5.gif);  
+    background-color: transparent;    
+    width:22px;
+    height:181px;
+}
+.bigbt.in {
+    background-image: url(../images/butt5_d.gif);    
+    background-color: transparent;  
+    width:22px;
+    height:181px;
+}
+
+/*公共过滤条件*/
+.Publicsearch .datalist {
+    border: 1px solid #AFAFAF;
+    width: 100%;
+    background-image: url(../images/Publicsearchbg.gif); 
+    position: relative;
+    font-size: 12px;
+}
+
+.Publicsearch .datalist th {
+    color: #313131;
+    text-align: right;
+    font-size: 12px;
+    width: 150px;
+}
+
+.Publicsearch .datalist td {
+    text-align: left;
+    color: #666666;
+    padding: 4px;
+}
+
+.PublicsearchSubmit {
+    background-image: url(../images/edit_03.gif);
+    border: medium none;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 12px;
+    height: 22px;
+    line-height: 20px;
+    padding-bottom: 0px;
+    vertical-align: middle;
+    width: 68px;
+}
+
+.PublicsearchSubmit1 {
+    background-image: url(../images/edit_04.gif);
+    border: medium none;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 12px;
+    height: 22px;
+    line-height: 20px;
+    padding-bottom: 0px;
+    vertical-align: middle;
+    width: 68px;
+}
+.PublicsearchReset {
+    background-image: url(../images/edit_05.gif);
+    border: medium none;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 12px;
+    height: 26px;
+    line-height: 20px;
+    padding-bottom: 0px;
+    vertical-align: middle;
+    width: 75px;
+}
+
+#borderContainerId {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.filterPane {
+    height: 105px;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+/*图表*/
+
+.Chart  {
+    background-color: #fff;
+    margin: 0px;
+    padding: 10px;
+    color: #000;
+    width:100%;
+    font-size:14px;
+}
+.Chart td{
+    border: 1px solid #AFAFAF;
+    font-size: 12px;
+    padding: 5px;
+    color: #000;
+    font-weight: bold;
+    margin: 0px;
+    
+    
+}
+
+/**
+ * 该样式主要用于拥有过滤面板的页面，方面对元素进行resize
+ * 示例可见于newPubopinion.html中的舆情列表标签
+ */
+.singleWidget{
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; 
+    overflow-y: auto;
+}
+
+.Chart .head {
+    
+    font-weight: bold;
+    font-family: "宋体";
+    color: #333;
+    line-height: 30px;
+    background-image: url(../images/tabline3.gif);
+    text-indent: 20px;
+}
+/*图表结束*/
+
+/**
+ * 比例图表,标签页
+ */
+.leftPane, .centerPane{
+    width: 47%;
+    display: inline-block;
+    text-align: center;
+    border: 1px solid #AFAFAF;
+    margin: 8px;
+    text-indent: 10px;
+     
+}
+
+.pieTitle{
+    width: 100%;
+    height: 25px;
+    line-height: 25px;
+    font-weight: bold;
+    text-align: left;
+    font-size: 12px;
+    background: url(../images/tabline.gif) repeat-x;
+}
+.leftTab > .dijitTabContainerLeft-tabs .dijitTab .dijitTabContent{
+    white-space: normal;
+    width: 1em;
+    word-wrap: break-word;
+}
+.leftTab > .dijitAlignLeft{
+background-color: #bebebe;
+}
+
+/**
+ * IE6 底部固定 
+ * IE6 下不支持position: fixed
+ */ 
+* html .fixed-bottom {
+    position: absolute;
+    bottom: auto;
+    top: expression(eval(document.documentElement.scrollTop + document.documentElement.clientHeight-this.offsetHeight-(parseInt(this.currentStyle.marginTop,10)||0)-(parseInt(this.currentStyle.marginBottom,10)||0)));
+}
+
+
+.pageDescription{
+    height: 25px;
+    color:#eeeced;
+    font-family:"楷体_GB2312";    
+    line-height: 25px;
+    font-size: 12px;
+    background: #787878;
+    text-indent: 10px;
+}
+
+.pageDescription1{
+    height: 25px;
+    color:#666; 
+    line-height: 25px;
+    font-size: 12px;
+    font-weight:bold;
+    background: #313540;
+    text-indent: 10px;
+    background-image: url(../images/tabline.gif);
+}
+/**
+ * 分页链接样式
+ */
+
+.gridLink{
+    border: 0px solid #BEBEBE;
+    padding: 2px;
+    margin: 10px auto;
+}
+.gridLink a, .gridLink .total{
+    border: 1px solid #BEBEBE;
+    margin: 0 2px;
+    padding: 3px;
+    text-decoration: none;
+}
+.gridLink .disable{
+    cursor : default;
+}
+.gridLink  a:link, .gridLink .total {
+    color:#888888;
+}
+.gridLink a:visited {
+    color:#dddddd;
+    border: 1px solid #dddddd;
+}
+.gridLink a:hover {
+    color:#46626a;
+}
+.gridLink .cur{
+    font-weight: bold;
+}
+
+.disabled{
+    color: #0f0f0f;
+}
+.query_button_center{
+    margin-top: 15px;
+}
+.table_list{
+
+}
+.table_list .title{
+	width: 100px;
+}
+.table_list .t_l{
+    text-align: right;
+}
+.table_list tr{
+    height: 25px;
+}

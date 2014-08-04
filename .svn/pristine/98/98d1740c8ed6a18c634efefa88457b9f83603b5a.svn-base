@@ -1,0 +1,72 @@
+<div class="AffairEntryForm">
+	<form data-dojo-type="dijit/form/Form"
+		style="width: 100%; height: 100%;" data-dojo-attach-point="formNode">
+			<fieldset>
+				<legend>事件基本信息</legend>
+				<table border="1" class="table-list"
+					style="width: 100%; height: 100%;" data-dojo-attach-point="tableNode">
+					<tbody>
+						<tr>
+							<td>事件编号</td>
+							<td><span data-dojo-type="dijit/form/TextBox"
+								name="affairId" style="width: 100%;"></span>
+							</td>
+						</tr>
+						<tr>
+							<td>事件类型</td>
+							<td><span data-dojo-type="dijit/form/TextBox"
+								name="affairType" style="width: 100%;"></span>
+							</td>
+						</tr>
+						<tr>
+							<td>发生区域</td>
+							<td><input type="text" data-dojo-type="dijit/form/TextBox"
+								name="arisesArea" style="width: 100%;"></input>
+							</td>
+						</tr>
+						<tr>
+							<td>性质类别</td>
+							<td><input type="text" data-dojo-type="dijit/form/TextBox"
+								name="characterCategory" style="width: 100%;"></input></td>
+						</tr>
+						<tr>
+							<td>性质子类别</td>
+							<td><input type="text" data-dojo-type="dijit/form/TextBox"
+								name="characterSubCategory" style="width: 100%;"></input></td>
+						</tr>
+						<tr>
+							<td>来源种类</td>
+							<td><input type="text" data-dojo-type="dijit/form/TextBox"
+								name="classOfOrigin" style="width: 100%;"></input></td>
+						</tr>
+						<tr>
+							<td>优先级</td>
+							<td><input type="text" data-dojo-type="dijit/form/TextBox"
+								name="priority" style="width: 100%;"></input></td>
+						</tr>
+						<tr>
+							<td>负责人</td>
+							<td><input type="text" data-dojo-type="dijit/form/FilteringSelect"
+								name="responseUser" style="width: 100%;"></input></td>
+						</tr>
+						<tr>
+							<td>协助人</td>
+							<td><input type="text" data-dojo-type="dijit/form/FilteringSelect"
+								name="assistUsers" style="width: 100%;" required=false></input></td>
+						</tr>
+						<tr>
+							<td>受理时限</td>
+							<td><input type="text" data-dojo-type="dojox3rd/widget/DateTextBox"
+								name="acceptTimeLimit" style="width: 100%;"></input></td>
+						</tr>
+						<tr>
+							<td>完成时限</td>
+							<td><input type="text" data-dojo-type="dojox3rd/widget/DateTextBox"
+								name="finishTimeLimit" style="width: 100%;" required=false></input></td>
+						</tr>
+					</tbody>
+				</table>
+			</fieldset>
+	</form>
+</div>
+

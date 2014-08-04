@@ -1,0 +1,76 @@
+﻿{
+	"defaultValue": {
+		"priority": "优先级",
+		"affairEntryDetail": {
+			"description": "事件描述",
+			"subject": "事件主题",
+			"resolveResult": "事件处理结果"
+		},
+		"knowledgeFromAffairs": [
+			{
+				"state": "state",
+				"knowledgeDescripition": "knowledgeDescripition",
+				"createTime": 1363231921599
+			}
+		],
+		"characterSubCategory": "性质子类别",
+		"affairType": "事件类型",
+		"characterCategory": "性质类别",
+		"arisesArea": "发生区域",
+		"classOfOrigin": "来源种类",
+		"acceptTimeLimit": 1363231921599,
+		"finishTimeLimit": 1363231921599,
+		"isKnowledgeAdded": true,
+		"operateState": "Submitted",
+		"affairId": "事件编号"
+	},
+	"detailValue": {
+		"priority": "优先级",
+		"id": null,
+		"affairType": "事件类型",
+		"characterCategory": "性质类别",
+		"arisesArea": "发生区域",
+		"assistUsers": [
+			{
+				"id": null,
+				"accountName": "协助人1名称"
+			}
+		],
+		"knowledgeFromAffairs": [
+			{
+				"id": null,
+				"state": "state",
+				"knowledgeDescripition": "knowledgeDescripition",
+				"createTime": 1363185696279,
+				"author": {
+					"id": null
+				}
+			}
+		],
+		"affairId": "事件编号",
+		"characterSubCategory": "性质子类别",
+		"classOfOrigin": "来源种类",
+		"acceptTimeLimit": 1363185696279,
+		"finishTimeLimit": 1363185696279,
+		"isKnowledgeAdded": true,
+		"operateState": "Submitted",
+		"affairEntryDetail": {
+			"id": null,
+			"description": "事件描述",
+			"subject": "事件主题",
+			"resolveResult": "事件处理结果"
+		},
+		"associatedCustomer": {
+			"name": "张三",
+			"id": null,
+			"tel": "0755-88888888",
+			"email": "zhangsan@qq.com",
+			"company": "XXX有限公司",
+			"department": "销售部"
+		},
+		"responseUser": {
+			"id": null,
+			"accountName": "负责人名称"
+		}
+	}
+}

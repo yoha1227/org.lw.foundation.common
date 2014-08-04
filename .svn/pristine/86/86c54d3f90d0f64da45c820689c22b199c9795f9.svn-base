@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>设备种类</title>
+
+<style type="text/css">
+@import
+	"http://172.16.205.60:8080/webui/common/dojotoolkit/dijit/themes/claro/claro.css"
+	;
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojotoolkit/dojo/resources/dojo.css"
+	;
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/dgrid.css";
+
+@import
+	"http://172.16.205.60:8080/webui/common/dojo-3rd/dgrid/css/skins/claro.css"
+	;
+</style>
+<body class="claro">
+	<span data-dojo-type="dijit.Toolbar"> 
+		<input type="button"
+		id="btnAdd" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Add" intermediateChanges="false" label="添加种类"
+		iconClass="dijitNoIcon"></input> 
+		
+		<input type="button"
+		id="btnAddSub" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Add" intermediateChanges="false" label="添加品类"
+		iconClass="dijitNoIcon"></input> 
+		
+		
+		<input type="button" id="btnCheckSureTrue"
+		data-dojo-type="dijit.form.Button" tabIndex="-1" iconClass="Recordred"
+		intermediateChanges="false" label="审核" iconClass="dijitNoIcon"></input>
+		
+		<input type="button" id="btnCheckSureFalse" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Recordgreen" intermediateChanges="false" label="反审核"
+		iconClass="dijitNoIcon"></input>
+		
+		
+		<input type="button"
+		data-dojo-type="dijit.form.Button" tabIndex="-1" id="btnDel"
+		iconClass="Cross" intermediateChanges="false" label="删除"
+		iconClass="dijitNoIcon"></input> 
+		
+		
+		
+		<input type="button" data-dojo-type="dijit.form.Button" tabIndex="-1"
+		iconClass="Zoom" intermediateChanges="false" id="btnReflash"
+		label="查询"></input> 
+		
+	</span>
+	<div class="AffairEntryGrid">
+		<div>
+			<table id="MainGrid"
+				style="min-width: 1em; min-height: 1em; width: 100%;"></table>
+		</div>
+	</div>
+
+
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="myDialog"
+		title="编辑种类信息">
+		<div data-dojo-type="dijit/form/Form" id="myForm"
+			data-dojo-id="myForm" encType="multipart/form-data" action=""
+			method="">
+			<table class="dijitDialogPaneContentArea">
+				<tr style="display: none;">
+					<td><label for="id">编号:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						readonly="readonly" name="id" id="id"></td>
+				</tr>
+				<tr>
+					<td><label for="assitenCode">类别名称:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						required="true"
+						data-dojo-props="regExp:'^.{0,40}$', invalidMessage:'长度不超过40位'"
+						name="matTypeName" id="matTypeName"></td>
+				</tr>
+				
+				<tr>
+					<td><label for="comment">备注:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox" name="comment"
+					data-dojo-props="regExp:'^.{0,200}$', invalidMessage:'长度不超过200位'"
+						id="comment"></td>
+				</tr>
+			</table>
+		</div>
+		<div class="dijitDialogPaneActionBar">
+			<button id="btnModifySubmnit" dojoType="dijit.form.Button" type="button">保存</button>
+			<button dojoType="dijit.form.Button" type="button"
+				onClick="myDialog.onCancel();" id="cancel">取消</button>
+		</div>
+	</div>
+	
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="subDialog"
+		title="编辑种类信息">
+		<div data-dojo-type="dijit/form/Form" id="subForm"
+			data-dojo-id="subForm" encType="multipart/form-data" action=""
+			method="">
+			<table class="dijitDialogPaneContentArea">
+				<tr style="display: none;">
+					<td><label for="id">编号:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						readonly="readonly" name="id" id="id"></td>
+				</tr>
+				
+				<tr style="display: none;">
+					<td><label for="id">种类ID:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						readonly="readonly" name="supMatType.id" id="supMatType.id"></td>
+				</tr>
+				
+				<tr>
+					<td><label for="supTypeSelect">类别名称:</label></td>
+					<td><div id="supTypeSelect"></div></td>
+				</tr>
+				
+				<tr>
+					<td><label for="matTypeName">品类名称:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox"
+						required="true"
+						data-dojo-props="regExp:'^.{0,40}$', invalidMessage:'长度不超过40位'"
+						name="matTypeName" id="matTypeName"></td>
+				</tr>
+				
+				<tr>
+					<td><label for="comment">备注:</label></td>
+					<td><input data-dojo-type="dijit/form/TextBox" name="comment"
+					data-dojo-props="regExp:'^.{0,200}$', invalidMessage:'长度不超过200位'"
+						id="comment"></td>
+				</tr>
+			</table>
+		</div>
+		<div class="dijitDialogPaneActionBar">
+			<button id="btnModifySubmnit" dojoType="dijit.form.Button" type="button">保存</button>
+			<button dojoType="dijit.form.Button" type="button"
+				onClick="myDialog.onCancel();" id="cancel">取消</button>
+		</div>
+	</div>
+</body>
+</html>

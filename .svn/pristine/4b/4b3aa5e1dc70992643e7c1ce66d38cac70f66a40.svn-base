@@ -1,0 +1,207 @@
+package org.hy.foundation.utils.filter;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.hy.foundation.common.dao.jpa.CrudableDaoUtils.MatchType;
+import org.hy.foundation.utils.asserts.AssertUtils;
+import org.hy.foundation.utils.text.StringUtil;
+
+
+
+public class PropertyFilter {
+
+	private String associateName;
+
+	private MatchType matchType;
+	private String propertyName;
+	private Object propertyValue;
+	
+	private Boolean isOr;
+	
+	public PropertyFilter(String propertyName, Object propertyValue,
+			MatchType matchType) {
+		this.initPropertyFilter(null,propertyName,propertyValue,matchType,false);
+	}
+	
+	public PropertyFilter(String associateName,String propertyName, Object propertyValue,
+			MatchType matchType) {
+		this.initPropertyFilter(associateName,propertyName,propertyValue,matchType,false);
+	}
+
+	public PropertyFilter(String propertyName, Object propertyValue,
+			MatchType matchType,Boolean isOr) {
+		this.initPropertyFilter(null,propertyName,propertyValue,matchType,isOr);
+	}
+	
+	public PropertyFilter(String associateName,String propertyName, Object propertyValue,
+			MatchType matchType,Boolean isOr) {
+		this.initPropertyFilter(associateName,propertyName,propertyValue,matchType,isOr);
+	}
+
+	public void initPropertyFilter(String associateName,String propertyName, Object propertyValue,
+			MatchType matchType,Boolean isOr) {
+		this.associateName = associateName;
+		this.matchType = matchType;
+		this.propertyName = propertyName;
+		this.propertyValue = propertyValue;
+		this.isOr = isOr;
+	}
+
+	/**
+	 * 需要关联的实体名称
+	 */
+	public String getAssociateName() {
+		return associateName==null?"":associateName;
+	}
+
+	public void setAssociateName(String associateName) {
+		this.associateName = associateName;
+	}
+
+	public MatchType getMatchType() {
+		return matchType;
+	}
+
+	public void setMatchType(MatchType matchType) {
+		this.matchType = matchType;
+	}
+
+	public String getPropertyName() {
+		return propertyName;
+	}
+
+	public void setPropertyName(String propertyName) {
+		this.propertyName = propertyName;
+	}
+
+	public Object getPropertyValue() {
+		return propertyValue;
+	}
+
+	public void setPropertyValue(Object propertyValue) {
+		this.propertyValue = propertyValue;
+	}
+
+	public Boolean getIsOr() {
+		return isOr;
+	}
+
+	public void setIsOr(Boolean isOr) {
+		this.isOr = isOr;
+	}
+
+	/**
+	 * 解析过滤条件列表字符串 字段名称_值类型_值_比较方式_联合方式_关联实体<br>
+	 * 值类型分为：
+	 * <pre>
+	 * S(String.class), I(Integer.class), L(Long.class), B(Boolean.class), C(Collection.class);
+	 * </pre>
+	 * 
+	 * 比较方式分为：
+	 * <pre>
+	 * IN, EQ, LIKE, LT, GT, LE, GE;
+	 * </pre>
+	 * 
+	 * 联合方式分为：
+	 * <pre>
+	 * AND,OR;
+	 * 若是AND可以留空
+	 * </pre>
+	 * 
+	 * 联合方式分为：
+	 * 若关联实体不是集合而是自身属性，则可以留空
+	 * 
+	 * <br>
+	 * 例如：name_S_ch_LIKE__<br>
+	 * 注意：若参数类型为Boolean时，True必须传入True或true，False可以不设置。例：isSet_B__EQ or isSet_B_True_EQ
+	 * 
+	 * @param exp name_S_ch_LIKE__
+	 * @return 若传入参数为空则返回null
+	 */
+	public static List<PropertyFilter> parsePropertyFilterExp(String exp) {
+		if(StringUtils.isEmpty(exp)) return new ArrayList<PropertyFilter>();
+		
+		exp=exp+",";
+		String expReg="([^\\_]*)_([SILB]C?)_([^\\_]*)_([^\\_]*)_(.*?)_(.*?),";
+		
+		AssertUtils.isTrue(exp.matches(expReg), "错误的格式，请调整如下例：name_S_ch_LIKE__entity.entitySet,name_IC_ch_LIKE_OR_");
+		List<PropertyFilter> filters=new ArrayList<PropertyFilter>();
+		
+		List<String[]> exps=StringUtil.matchAll(exp, expReg);
+		for(String[] singleExp : exps){
+			String pn=singleExp[1];
+			String pt=singleExp[2];
+			Object pv=null;
+			String mt=singleExp[4];
+			String ae=singleExp[6];
+			
+			if(mt.equals("ISNULL")){
+				
+			}else if(pt.equals("S")){
+				pv=String.valueOf(singleExp[3]);
+			}else if(pt.equals("I")){
+				pv=Integer.valueOf(singleExp[3]);
+			}else if(pt.equals("L")){
+				pv=Long.valueOf(singleExp[3]);
+			}else if(pt.equals("B")){
+				pv=Boolean.valueOf(singleExp[3]);
+			}else if(pt.contains("C")){
+				if(pt.startsWith("S")){
+					Collection<String> tempPv=new ArrayList<String>();
+					String[] allStr=singleExp[3].split(",");
+					for(String str : allStr)
+						tempPv.add(str);
+					
+					pv=tempPv;
+				}else if(pt.startsWith("I")){
+					Collection<Integer> tempPv=new ArrayList<Integer>();
+					String[] allStr=singleExp[3].split(",");
+					for(String str : allStr)
+						tempPv.add(Integer.valueOf(str));
+					
+					pv=tempPv;
+				}else if(pt.startsWith("L")){
+					Collection<Long> tempPv=new ArrayList<Long>();
+					String[] allStr=singleExp[3].split(",");
+					for(String str : allStr)
+						tempPv.add(Long.valueOf(str));
+					
+					pv=tempPv;
+				}else if(pt.startsWith("B")){
+					Collection<Boolean> tempPv=new ArrayList<Boolean>();
+					String[] allStr=singleExp[3].split(",");
+					for(String str : allStr)
+						tempPv.add(Boolean.valueOf(str));
+					
+					pv=tempPv;
+				}
+			}
+			
+			MatchType matchType = null;
+			if(mt.equals("EQ")){
+				matchType=MatchType.EQ;
+			}else if(mt.equals("GE")){
+				matchType=MatchType.GE;
+			}else if(mt.equals("GT")){
+				matchType=MatchType.GT;
+			}else if(mt.equals("IN")){
+				matchType=MatchType.IN;
+			}else if(mt.equals("LE")){
+				matchType=MatchType.LE;
+			}else if(mt.equals("LT")){
+				matchType=MatchType.LT;
+			}else if(mt.equals("LIKE")){
+				matchType=MatchType.LIKE;
+			}else if(mt.equals("ISNULL")){
+				matchType=MatchType.ISNULL;
+			}
+			
+			filters.add(new PropertyFilter(ae,pn, pv, matchType,singleExp[4].length()>0));
+		}
+		return filters;
+	}
+
+}

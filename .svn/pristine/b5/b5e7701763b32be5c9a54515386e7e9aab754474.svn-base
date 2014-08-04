@@ -1,0 +1,44 @@
+define("dojox3rd/widget/SyncCheckedMenuItem",
+		["dojo/_base/declare", // declare
+		 "dojo/dom-class", // domClass.toggle
+		 "dijit/CheckedMenuItem"
+		 ], function(declare, domClass, CheckedMenuItem){
+	
+	// module:
+	//		dojox3rd/widget/SyncCheckedMenuItem
+	return declare("dojox3rd/widget/SyncCheckedMenuItem", 
+			CheckedMenuItem, {
+		
+		// summary:
+		//		A checkbox-like menu item for toggling on and off
+
+		iconClass: "",	// override dijitNoIcon
+
+		onChange: function(/*Boolean*/ /*===== checked =====*/){
+			// summary:
+			//		User defined function to handle check/uncheck events
+			// tags:
+			//		callback
+		},
+		
+		setChecked: function() {
+			this.set("checked", true);
+		},
+
+		setUnchecked: function() {
+			this.set("checked", false);
+		},
+
+		_onClick: function(evt){
+			// summary:
+			//		Clicking this item just toggles its state
+			// tags:
+			//		private
+			if(!this.disabled){
+				this.set("checked", true);
+				this.onChange(this.checked);
+			}
+			this.onClick(evt);
+		}
+	});
+});

@@ -1,0 +1,51 @@
+@CHARSET "UTF-8";
+.navigableTabContainer{
+}
+.navigableTabContainer .dijitTabContainerTop-tabs .dijitTabContent{
+    padding:0;
+    background: none;
+    border-right-width:0;
+    border-left-width:0;
+}
+.navigableTabContainer .dijitTabContainerTop-tabs .dijitTabChecked .dijitTabContent{
+    padding-bottom:0; 
+    padding-top:0;
+    background: none;
+} 
+.navigableTabContainer .dijitTabContainerTop-tabs .dijitTab{
+    position:relative;
+    padding-top: 0;
+    top: 0;
+}
+/*
+.navigableTabContainer .dijitTab{
+	background: url(../images/guide/imgbg.jpg) repeat-x;
+}*/
+.navigableTabContainer .dijitTab .dijitTabInnerDiv{
+    background:none;
+}
+
+.navigableTabContainer .dijitTab .navigableTabIcons{
+    height: 54px;
+    text-align: center;
+    width: 10px;
+}   
+ 
+.navigableTabContainer .dijitTab .realy{
+    width: 142px;
+}   
+
+.navigableTabContainer .dijitTab .other{
+    width: 83px;
+}  
+
+.navigableTabContainer .dijitTab .cur{
+    width: 142px;
+	position: relative;
+	left: -20px;
+}
+.navigableTabContainer .content-frame{
+	width: 100%;
+	height: 100%;
+	border :0;
+}

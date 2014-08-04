@@ -1,0 +1,112 @@
+define([ "dojo/_base/array", 
+         "dojo/dom-construct" ], 
+         function(array, domConstruct) {
+	return {
+		/**
+		 * 将int型的时间转换成为指定可读形式
+		 * 
+		 * @param {Object}
+		 *            i int型，时间数
+		 * @param {Object}
+		 *            type string型,转换的类型。该类型与PHP的date类型类似如Y表示四位的年，H表示24进制的小时
+		 */
+		formatToString : function(i, type) {
+			if (parseInt(i) || i == null) {
+				var addPrefix = function(i, undefined) {
+					if (i != undefined) {
+						return (parseInt(i) > 9 ? i : "0" + i);
+					}
+				}
+				var format = function(t, index, obj) {
+					switch (t) {
+					case "Y":
+						return date.getFullYear();
+						break;
+					case "y":
+						return date.getFullYear().toString().substr(-2);
+						break;
+					case "m":
+					case "n":
+						var m = date.getMonth() * 1 + 1;
+						return t == 'm' ? addPrefix(m) : m;
+						break;
+					case "j":
+					case "d":
+						var d = date.getDate();
+						return t == "d" ? addPrefix(d) : d;
+						break;
+					case "H":
+					case "G":
+						var H = date.getHours();
+						return t == "H" ? addPrefix(H) : H;
+						break;
+					case "i":
+						var i = date.getMinutes();
+						return addPrefix(i);
+						break;
+					case "s":
+						return addPrefix(date.getSeconds());
+						break;
+					}
+				}
+				var date = i == null ? new Date() : new Date(i * 1000);
+				type = type || "Y-m-d H:i:s";
+				return type.replace(/[ymdhis]/ig, format);
+			}
+		},
+		
+		/**
+		 * 将字符串型数据转换成为unix时间戳
+		 * 
+		 * @param {Object}
+		 *            str 时间字符串。可以为以下三种形式:"0000-00-00
+		 *            00:00:00","0000-00-00","00:00:00"
+		 */
+		formatToInt : function(str) {
+			if (/^\d{4}[^\d]\d{1,2}[^\d]\d{1,2}$/.test(str)) {
+				str += " 00:00:00";
+			} else if (/^\d{1,2}[^\d]\d{1,2}[^\d]\d{1,2}$/.test(str)) {
+				str = " " + str;
+			}
+			var p = str.split(" ");
+			var dt = p[0] ? p[0].split("-") : "";
+			var tm = p[1] ? p[1].split(":") : "";
+
+			var date = new Date();
+			var isNull = true;
+			if (dt.length > 0) {
+				isNull = false;
+				var len = dt.length;
+				var i = 0;
+				while (len--) {
+					if (i == 0) {
+						date.setFullYear(dt[i]);
+					} else if (i == 1) {
+						date.setMonth(dt[i] * 1 - 1);
+					} else if (i == 2) {
+						date.setDate(dt[i]);
+					}
+					i++;
+				}
+			}
+
+			if (tm.length > 0) {
+				isNull = false;
+				var len = tm.length;
+				var i = 0;
+				while (len--) {
+					if (i == 0) {
+						date.setHours(tm[i]);
+					} else if (i == 1) {
+						date.setMinutes(tm[i]);
+					} else if (i == 2) {
+						date.setSeconds(tm[i]);
+					}
+					i++;
+				}
+			}
+
+			return isNull ? null : parseInt(date.getTime() / 1000);
+		}
+	}
+});

@@ -1,0 +1,7 @@
+[
+    {"operateStep":"Start","operateTime":1363525471081,"operator":{"id":1,"departments":[]}},
+    {"operateStep":"Second","operateTime":1363525471081,"operator":{"id":1,"departments":[]}},
+    {"operateStep":"Third","operateTime":1363525471081,"operator":{"id":1,"departments":[]}},
+    {"operateStep":"Fourth","operateTime":1363525471081,"operator":{"id":1,"departments":[]}},
+    {"operateStep":"Fifth","operateTime":1363525471081,"operator":{"id":1,"departments":[]}},
+]

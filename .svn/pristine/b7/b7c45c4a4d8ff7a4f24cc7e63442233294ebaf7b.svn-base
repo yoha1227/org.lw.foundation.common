@@ -1,0 +1,16 @@
+{
+  label: 'name',
+  items: [
+     { id:'1', name:'渠道系统',leaf:'false',
+         children:[
+         			{id:'11', name:'功能节点1', href:'http://www.baidu.com',iconClass:'Cog',leaf:'true'}, 
+         			{id:'12', name:'功能节点2',iconClass:'Cog',leaf:'false',
+         				children:[
+         							{id:'121', name:'功能节点21',href:'http://www.baidu.com', iconClass:'Cog',leaf:'true'  }, 
+         							{id:'122', name:'功能节点22',href:'http://www.baidu.com', iconClass:'Cog',leaf:'true'  }
+         						  ] 
+         			}, 
+         			{id:'13', name:'功能节点3',href:'http://www.baidu.com', iconClass:'Cog',leaf:'true'  }
+         			]
+     }
+]}

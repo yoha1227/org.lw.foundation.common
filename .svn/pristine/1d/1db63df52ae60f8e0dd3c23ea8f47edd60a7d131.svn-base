@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>main entry for affair assign UI</title>
+	
+</head>
+
+<body class="claro">
+    <div class='disclaimer'>	-----	begin of main area for iframe	-----	</div>
+    <iframe class='iframe' id="viewIframeArea" name="viewIframe" src="mainView.html" style="height: 1000px; width: 1000px">
+    	main area for iframe
+    </iframe>
+    <div class='disclaimer'>	-----	end of main area for iframe	-----	</div>
+</body>
+
+</html>

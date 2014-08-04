@@ -1,0 +1,42 @@
+<div class="AffairEntryGrid">
+		<div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm"
+encType="multipart/form-data" action="" method="">
+    <table class="dijitDialogPaneContentArea">
+    	<tr style="display:none;">
+            <td><label for="id">编号:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" readonly="readonly" name="id" id="id"></td>
+        </tr>
+        <tr>
+            <td><label for="assitenCode">助记码:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="assitenCode" id="assitenCode"></td>
+        </tr>
+        <tr>
+            <td><label for="unitName">施工单位:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="unitName" id="unitName"></td>
+        </tr>
+        <tr>
+            <td><label for="linkMan">联系人:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="linkMan" id="linkMan"></td>
+        </tr>
+        <tr>
+            <td><label for="tel">联系电话:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="tel" id="tel"></td>
+        </tr>
+        <tr>
+            <td><label for="veriCode">验证码:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="veriCode" id="veriCode"></td>
+        </tr>
+        <tr>
+            <td><label for="comment">备注:</label></td>
+            <td><input data-dojo-type="dijit/form/TextBox" name="comment" id="comment"></td>
+        </tr>
+    </table>
+</div>
+    <div class="dijitDialogPaneActionBar">
+        <button dojoType="dijit.form.Button" type="button" onClick="UpdateRecord();" id="ok">保存</button>
+        <button dojoType="dijit.form.Button" type="button" onClick="myDialog.onCancel();"
+                id="cancel">取消</button>
+    </div>
+    <div class="dijitDialogPaneActionBar">
+</div>
+	

@@ -1,0 +1,41 @@
+define(["dojo/request",
+        "dojo/json",
+		"service_stub/itsmServiceEntryPoint",
+		"dojox3rd/restfulstub/CrudableRestfulStubRequestImpl"
+        ], function(request, json, serviceEntryPoint, CrudableRestfulServiceStub) {
+	
+	var serviceBaseUrl = serviceEntryPoint.getContextPath() + "/service/organization/organizationMgr/";
+	var timeout = 2000;
+	
+	var restfulStub = new CrudableRestfulServiceStub(serviceBaseUrl, timeout);
+
+	function RequestOptions () {
+		this.sync = true;
+		this.timeout = null;
+		this.data = null;
+		this.handleAs = "json";
+		this.headers = {
+				"Content-Type" : "application/json;charset=UTF-8",	//需要加上charset=UTF-8，否则java会报415错误
+				"Accept" : "application/json;charset=UTF-8"
+			};
+	}
+	
+	restfulStub.findTopLevelEntities = function () {
+		
+    	var options = new RequestOptions();
+    	options.sync = false;
+
+    	return request.get(this.serviceBaseUrl + "toplevel/", options);
+	};
+	
+	restfulStub.findChildrenOfEntityById = function (id) {
+		
+    	var options = new RequestOptions();
+    	options.sync = false;
+
+    	return request.get(this.serviceBaseUrl + "children/" + id, options);
+	};
+	
+	return restfulStub;
+
+});

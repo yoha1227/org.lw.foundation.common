@@ -1,0 +1,102 @@
+/**
+ * 行政地名树开结构
+ */
+define([ "dojo/store/JsonRest", 
+         "dijit/Tree", 
+         "dojo/_base/array", 
+         "dojo/_base/config",
+         "dojo/_base/declare" ], 
+    function(JsonRest, Tree, array, config, declare) {
+
+	var url = config.project.serviceUrl + "entity/resteasy/administrativeDivision/";
+
+	var administrativeDivision = JsonRest({
+		target : url,
+		// 后台服务BUG，修正后应该删除
+		accepts : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+		mayHaveChildren : function(object) {
+			// see if it has a children property
+			return object.administrativeClass ? /(00)$/.test(object.administrativeClass) : true;
+		},
+		getChildren : function(object, onComplete, onError) {
+			if (object instanceof Array) {
+				onComplete(object);
+			} else {
+				this.get("sub_division/" + object.id).then(function(fullObject) {
+					onComplete(fullObject);
+				}, function(error) {
+					console.error(error);
+					onComplete([]);
+				});
+			}
+		},
+		getRoot : function(onItem, onError) {
+			this.get("root").then(onItem, onError);
+		},
+		getLabel : function(object) {
+			return object.divisionName;
+		}
+	});
+	
+	return declare("suntang.dojox3rd.utils.AdministrativeDivisionTree",
+			Tree, {
+				/**
+				 * 取得当前选中的节点的路径名称
+				 * 
+				 * @param {Object}
+				 *            name 数组，依次为根节点名称至当前选中的节点名称
+				 * @param {Object}
+				 *            item 当前选中的节点的原始数据
+				 * @param {Object}
+				 *            nodeWidget 当前选中的节点的widget对象
+				 */
+				getSelectedPath : function(name, item, nodeWidget) {
+				},
+				childrenAttr : [],
+				showRoot : false, // 不显示根节点
+				model : administrativeDivision,
+				persist : false, // 不用cookie记录已经打开的节点
+				/**
+				 * 强制当前树只能展开一条节点路径
+				 * 
+				 * @param {Object}
+				 *            item
+				 * @param {Object}
+				 *            node
+				 */
+				onOpen : function(item, node) {
+					var sibling = node.getParent().getChildren(), self = this;
+					array.forEach(sibling, function(nd) {
+						if (nd.isExpanded && nd != node) {
+							self._collapseNode(nd);
+						}
+					});
+				},
+				/**
+				 * 重写父方法，触发getSelectedPath方法
+				 * 
+				 * @param {Object}
+				 *            nodeWidget
+				 * @param {Object}
+				 *            e
+				 */
+				_onClick : function(nodeWidget, e) {
+					var node = nodeWidget, item = nodeWidget.item;
+
+					var name = [ node.get("label") ];
+					var id = item.id;
+					while (1) {
+						node = node.getParent();
+						if (!node || node == this.rootNode) {
+							break;
+						}
+						name.push(node.get("label"));
+					}
+					name.reverse();
+					// console.log(name.join(" &gt;&gt; "))
+					this.getSelectedPath(name, item, nodeWidget);
+					this.inherited(arguments);
+				}
+			});
+
+});

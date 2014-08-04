@@ -1,0 +1,36 @@
+{
+	"dojoBaseUrl"	:	"http://172.16.205.60:8080/webui/common/dojotoolkit/dojo/dojo.js",
+	"dojoBlankHtmlUrl"	: "/blank.html",
+	"appBaseUrl"	:	".",
+	
+	"dojoConfig"	:	{
+    	"parseOnLoad" : false,
+    	"async" : true,
+    	"isDebug" : true,
+		"packages" : [
+			{ "name": "gridx",		"location": "../gridx" },
+			{ "name": "clipart",	"location": "../../maqetta/clipart" },
+			{ "name": "shapes",		"location": "../../maqetta/shapes"},
+			{ "name": "maqetta",	"location" : "../../../lib/maqetta" },
+			{ "name": "zazl",		"location": "../../../lib/zazl" },
+			{ "name": "dgrid",			"location": "../../dojo-3rd/dgrid" },
+			{ "name": "put-selector",	"location": "../../dojo-3rd/put-selector" },
+			{ "name": "selector",		"location": "../../dojo-3rd/selector" },
+			{ "name": "xstyle",			"location": "../../dojo-3rd/xstyle" }
+		]},
+		
+	"appConfig"		:	{
+		"dialogTitle" : "WebUi for ITSM",
+		"htmlTimeout" : 500,
+		"serviceTimeout" : 2000,
+		"appWelcomePagePath" : "/index.html",
+		"loginPagePath" : "/sys_mngt/login/index.html"
+		},
+		
+	"dojoExtPackages"	:	[
+		{ "name": "dojox3rd",	"location": "common/dojox3rd" },
+		{ "name": "service_stub",		"location": "common/service_stub" },
+		{ "name": "reused_package1",	"location": "common/reused_package1"},
+		{ "name": "reused_package2",	"location": "common/reused_package2"}
+	]
+}

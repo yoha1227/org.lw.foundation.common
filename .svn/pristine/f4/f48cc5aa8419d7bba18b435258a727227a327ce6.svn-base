@@ -1,0 +1,25 @@
+//define(["dojo/request",
+//        "dojo/json",
+//		"service_stub/itsmServiceEntryPoint",
+//		"dojox3rd/restfulstub/CrudableRestfulStubAsStore"
+//        ], function(request, json, serviceEntryPoint, CrudableRestfulStubAsStore) {
+//	
+//	var serviceBaseUrl = serviceEntryPoint.getContextPath() + "/service/affair/affairEntryManger/summary/";
+//	var timeout = 2000;
+//	
+//	return new CrudableRestfulStubAsStore(serviceBaseUrl, timeout);
+//
+//});
+
+define(["dojo/request",
+        "dojo/json",
+		"service_stub/itsmServiceEntryPoint",
+		"dojox3rd/restfulstub/CrudableRestfulStubAsStore"
+        ], function(request, json, serviceEntryPoint, CrudableRestfulStubAsStore) {
+	
+	var serviceBaseUrl = serviceEntryPoint.getContextPathDMP() + "/matUnit/GetAll/";
+	var timeout = 30000;
+	 //serviceBaseUrl = serviceEntryPoint.getContextPath() + "/service/affair/affairEntryManger/summary/";
+	return new CrudableRestfulStubAsStore(serviceBaseUrl, timeout);
+
+});

@@ -1,0 +1,144 @@
+/**
+ * 管理系统的登录与退出，还有登录有效时间
+ */
+// global variable for singleton
+// using top.window._sessionManager instead follow
+//if ((typeof _sessionManager == "undefined"))
+//	var _sessionManager = null;  
+
+define([
+	"dojo/cookie",
+	"dojo/_base/config",
+	"dojo/_base/lang",
+    "dojo/json",
+	"dojo/_base/declare"
+	], function(dojoCookie, config, lang, json, declare){
+	
+    var _sessionCookieName = "softarch_session";
+    
+    var convertTime = function(second){
+        var d = new Date();
+        d.setTime(d.getTime() + second*1000*60);
+        return d;
+    };
+    
+    var sessionExpireTime = convertTime( (config.sessionExpireTime ? config.sessionExpireTime : 30) );
+    
+    return declare("dojox3rd.sys.SessionManager", null, {
+    		
+        constructor : function(loginPage, appWelcomePage){
+        	if (typeof loginPage != "undefined")
+        		this._loginPagePath = loginPage;
+        	if (typeof appWelcomePage != "undefined")
+        		this._appWelcomePagePath = appWelcomePage;
+            
+        },
+        
+        // path必须以/结束，否则会创建两个cookie，另外path要设置为app的根路径，否则其它非本目录及其子目录下
+        // 的网页将无法访问此cookie
+        _cookieProps : {
+            expires: sessionExpireTime,
+            path : config.appContextPath + "/"
+        },
+        
+       _loginPagePath : null,
+        _appWelcomePagePath : null,
+        
+        setLoginPagePath : function(pagePath){
+        	this._loginPagePath = pagePath;
+        },
+        
+        setAppWelcomePagePath : function(pagePath){
+        	this._appWelcomePagePath = pagePath;
+        },
+        
+        /**
+         * 跳转到登录页面或者系统首页
+         * @param {Object} type login或者index,默认为login
+         */
+        _forwardToPage : function(type){
+            type = type || "login";
+            
+            if (type == "login") {
+            	if (this._loginPagePath == null) {
+                    var defaultPagePath = "/login/index.html";
+                    this._loginPagePath = (config.application.loginPagePath ? config.application.loginPagePath : defaultPagePath);
+            	}
+                if (this._loginPagePath != location.pathname) {
+                	var loginUrl = config.appContextPath + this._loginPagePath;
+                	
+                    loginUrl += "?r=" + escape(location.href);
+                    top.location.href = loginUrl;
+                }
+            }else {
+            	if (this._appWelcomePagePath == null) {
+                    var defaultPagePath = "/index.html";
+                    this._appWelcomePagePath = (config.application.appWelcomePagePath ? config.application.appWelcomePagePath : defaultPagePath);
+            	}
+                if (this._appWelcomePagePath != location.pathname) {
+                	var welcomeUrl = config.appContextPath + this._appWelcomePagePath;
+                	
+                	welcomeUrl += "?r=" + escape(location.href);
+                    top.location.href = welcomeUrl;
+                }
+            }
+        },
+        
+        /**
+         * 将以秒为单位的时间格式化为cookie的标准有效时间
+         * @param {Object} second
+         */
+        formatExpireTimeBySecond : function(second){
+            return convertTime(second);
+        },
+        
+        getSessionInfo : function(){
+        	var value = dojoCookie(_sessionCookieName);
+            console.debug("cookie value:" + value);
+            return value;
+        },
+
+        getLoginedUserName : function(){
+            return json.parse(this.getSessionInfo()).username;
+        },
+
+        isLogined : function(){
+            var cookieContent = dojoCookie(_sessionCookieName);
+            if (!cookieContent || cookieContent == "undefined"){
+                return false;
+            }else{
+                return true;
+            }
+        },
+        
+        finishLogin : function(value, props){
+            props = lang.mixin(this._cookieProps, props||{});
+            dojoCookie(_sessionCookieName, value, props);
+            console.debug("cookie value:" + dojoCookie(_sessionCookieName));
+            this._forwardToPage("index");
+            return true;
+        },
+        
+        finishLoginForUser : function(username){      	
+        	var value = json.stringify({
+        		"username" : username
+			});
+        	return this.finishLogin(value, null);
+        },
+        
+        doLogout : function(){
+            dojoCookie(_sessionCookieName, null, {expires: -1});
+            this._forwardToPage();
+            return true;
+        },
+        
+        assureSessionOk : function(){
+            if(this.isLogined()){
+                dojoCookie(_sessionCookieName, dojoCookie(_sessionCookieName), this._cookieProps);
+            }else{
+                this._forwardToPage();
+            }
+        }
+    });
+    
+ });

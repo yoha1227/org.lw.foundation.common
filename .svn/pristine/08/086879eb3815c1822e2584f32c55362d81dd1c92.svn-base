@@ -1,0 +1,104 @@
+[
+    {
+	   "id": 1,
+	   "name": "我的任务TOP5",
+	   "min_child_id": 100,
+	   "max_child_id": 199,
+	   "children": [
+	       {
+		      "id": 100,
+			  "name": "知识审核",
+			  "url": "./knownledge_mngt/mainView.html",
+			  "params": ""
+		   },
+	       {
+		      "id": 101,
+			  "name": "添加知识",
+			  "url": "",
+			  "params": "./affair_add_to_knowledge/mainView.html"
+		   },
+	       {
+		      "id": 102,
+			  "name": "处理",
+			  "url": "./affair_dispose/mainView.html",
+			  "params": ""
+		   },
+	       {
+		      "id": 103,
+			  "name": "受理",
+			  "url": "./affair_accept/mainView.html",
+			  "params": ""
+		   },
+	       {
+		      "id": 104,
+			  "name": "派工",
+			  "url": "./affair_assign/mainView.html",
+			  "params": ""
+		   }
+	   ]
+	},
+    {
+	   "id": 2,
+	   "name": "我的功能TOP5",
+	   "min_child_id": 200,
+       "max_child_id": 299,
+	   "children": [
+	       {
+		      "id": 200,
+			  "name": "登记新事件",
+			  "url": "./affair_submit/mainView.html",
+			  "params": ""
+		   },
+	       {
+		      "id": 201,
+			  "name": "人员维护",
+			  "url": "",
+			  "params": ""
+		   },
+	       {
+		      "id": 202,
+			  "name": "角色维护",
+			  "url": "",
+			  "params": ""
+		   },
+	       {
+		      "id": 203,
+			  "name": "组织机构",
+			  "url": "",
+			  "params": ""
+		   },
+	       {
+		      "id": 204,
+			  "name": "更多功能",
+			  "url": "",
+			  "params": ""
+		   }
+	   ]
+	},
+    {
+	   "id": 3,
+	   "name": "查询",
+	   "min_child_id": 300,
+       "max_child_id": 399,
+	   "children": [
+	       {
+		      "id": 300,
+			  "name": "查询事件",
+			  "url": "./affair_query/mainView.html",
+			  "params": ""
+		   },
+	       {
+		      "id": 301,
+			  "name": "搜索知识",
+			  "url": "",
+			  "params": ""
+		   },
+	       {
+		      "id": 303,
+			  "name": "更多查询",
+			  "url": "",
+			  "params": ""
+		   }
+	   ]
+	}
+]

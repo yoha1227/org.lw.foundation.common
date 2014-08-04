@@ -1,0 +1,48 @@
+// global variable for singleton
+// using top.window._topicRepository
+
+define([
+        "dojo/_base/kernel", 
+        "dojo/require", 
+        "dojo/_base/array",
+        "dojo/topic",
+        ], 
+    function(dojo, require, array, newTopic) {
+	
+	// bootstrap code when require module in client code:
+	if ((typeof top.window._topicRepository == "undefined") || (top.window._topicRepository ==  null))
+		top.window._topicRepository = new Array();
+
+	return {
+		
+		_getTopicById : function(id) {
+
+			return top.window._topicRepository[id];
+		},
+		
+		getTopicById : function(id) {
+
+			var topic = this._getTopicById(id);
+			if ((typeof topic == "undefined") || (topic == null)) {
+				topic = newTopic;
+				this.setTopicAsId(id, topic);
+			}
+			
+			return topic;
+		},
+		
+		setTopicAsId : function(id, topic) {
+
+			top.window._topicRepository[id] = topic;
+		},
+		
+		load : function(
+				  id,        // the string to the right of the !
+				  require,   // AMD require; usually a context-sensitive require bound to the module making the plugin request
+				  callback   // the function the plugin should call with the return value once it is done
+			){
+			
+		} 	
+	
+	};
+});

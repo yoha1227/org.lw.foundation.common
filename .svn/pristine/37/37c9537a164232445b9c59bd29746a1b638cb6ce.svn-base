@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>main entry for affair test suite</title>
+	
+	<script type="text/javascript" src="testAffairEntryServiceStub.js"></script>
+	<script type="text/javascript" src="testPartyMgrServiceStub.js"></script>
+	
+</head>
+
+<body>
+</body>
+
+</html>

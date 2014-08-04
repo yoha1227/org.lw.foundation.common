@@ -1,0 +1,12 @@
+// global variable for singleton
+// using top.window._sessionManager
+
+define([
+        "dojox3rd/sys/SessionManager"
+        ], function(SessionManager) {
+	
+	if ((typeof top.window._sessionManager == "undefined") || (top.window._sessionManager ==  null))
+		top.window._sessionManager = new SessionManager();
+
+	return top.window._sessionManager;
+});

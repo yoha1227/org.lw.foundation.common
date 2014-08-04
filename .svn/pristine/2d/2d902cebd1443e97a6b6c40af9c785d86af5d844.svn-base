@@ -1,0 +1,124 @@
+// global variable for singleton
+// using top.window._modelRepository
+
+define([
+        "dojo/_base/kernel", 
+        "dojo/require", 
+        "dojo/_base/array",
+		"dijit/registry",
+    	"dojo/query",
+        "dojo/dom", 
+        "dojo/dom-attr",
+        "dojo/dom-construct",
+     	"dojo/_base/config",
+    	"dojox3rd/utils/urlParsers",
+    	"dojox3rd/sys/modelSingleton", 
+    	"dojox3rd/sys/topicSingleton"
+        ], 
+    function(dojo, require, array, registry, query, dom, domAttr, domConstruct, config, urlParsers, modelSingleton, topicSingleton) {
+	
+	// bootstrap code when require module in client code:
+	// -- workspaceCtrlSingleton
+	if ((typeof top.window._workspaceController == "undefined") || (top.window._workspaceController ==  null))
+		top.window._workspaceController = {
+				
+				registerUiWidget : function(targetUiWidget) {
+
+				},
+										
+				buildIframeInUiWidget : function(targetUiWidget) {
+
+					var currentParsedUrl = urlParsers.parseUrl(targetUiWidget.ownerDocument.URL);
+
+					var nodesWithUiViewXPath = query("[ui_view_xpath]", targetUiWidget);
+					array.forEach(nodesWithUiViewXPath, function(node) {
+     					var targetIframe = domConstruct.create("iframe", {
+    	                    id: node.id + "iframe",
+    	                    src: currentParsedUrl.relative + "/" + domAttr.get(node, "ui_view_xpath"),
+    	                    width: "100%",
+    	                    height: "100%"
+    	                });
+						 
+     					domConstruct.place(targetIframe, node);
+					});
+				},
+										
+				buildLazyIframeInTabWidget : function(tabContainer, modelId) {
+
+					var currentParsedUrl = urlParsers.parseUrl(tabContainer.ownerDocument.URL);
+
+					var nodesWithUiViewXPath = query("[ui_view_xpath]", tabContainer.domNode);
+					
+					var iframeStrList = {};
+					var uiViewXPathMap = {};
+					
+					array.forEach(nodesWithUiViewXPath, function(node) {
+						var srcUrl = currentParsedUrl.relative + "/" + domAttr.get(node, "ui_view_xpath");
+						var iframeStr = '<iframe class="iframe" src="'+srcUrl+'"  style="height: 100%; width: 100%"></iframe>';
+						iframeStrList[node.id] = iframeStr;
+						
+						uiViewXPathMap[node.id] = domAttr.get(node, "ui_view_xpath");
+					});
+			        
+					modelSingleton.getModelById(modelId).set("iframeStrList", iframeStrList);
+					modelSingleton.getModelById(modelId).set("uiViewXPathMap", uiViewXPathMap);
+					
+					tabContainer.watch("selectedChildWidget", function(name, oldValue, newValue){
+			            if (dojo.trim( newValue.get("content") ) == "") {
+			            	var _iframeStrList = modelSingleton.getModelById(modelId).get("iframeStrList");
+			                newValue.set("content", _iframeStrList[ newValue.id ]);
+			            }
+		                
+		            	var _uiViewXPathMap = modelSingleton.getModelById(modelId).get("uiViewXPathMap");
+		                modelSingleton.getModelById("workspaceModel").set("uiViewXPath", _uiViewXPathMap[ newValue.id ]);
+			        });
+				},
+				
+				startupUiWidget : function(targetUiWidget, modelId) {
+					
+					// find back uiWidget and workspace models from singleton:
+					var uiViewXPath = modelSingleton.getModelById(modelId).get("uiViewXPath");
+					
+					var currentParsedUrl = urlParsers.parseUrl(targetUiWidget.ownerDocument.URL);
+
+				},
+										
+				startupTabWidget : function(tabContainer, modelId) {
+					
+					// find back uiWidget and workspace models from singleton:
+					var uiViewXPath = modelSingleton.getModelById(modelId).get("uiViewXPath");
+					
+	            	var _uiViewXPathMap = modelSingleton.getModelById(modelId).get("uiViewXPathMap");
+	            	for (var pathIndex in _uiViewXPathMap) {
+	            		var _uiViewXPath = _uiViewXPathMap[pathIndex];
+	            		if (_uiViewXPath == uiViewXPath) {
+	            			break;
+	            		}
+	            	}
+	            	
+	            	var paneNode = registry.byId(pathIndex);
+	            	tabContainer.selectChild(paneNode);
+	            	
+					modelSingleton.getModelById(modelId).watch("uiViewXPath", function(name, oldValue, value){
+	        			if (name == "uiViewXPath") {
+	        				var uiViewXPath = value;
+	        				
+	    	            	var _uiViewXPathMap = modelSingleton.getModelById(modelId).get("uiViewXPathMap");
+	    	            	for (var pathIndex in _uiViewXPathMap) {
+	    	            		var _uiViewXPath = _uiViewXPathMap[pathIndex];
+	    	            		if (_uiViewXPath == uiViewXPath) {
+	    	            			break;
+	    	            		}
+	    	            	}
+	    	            	
+	    	            	var paneNode = registry.byId(pathIndex);
+	    	            	tabContainer.selectChild(paneNode);
+	        			}
+					});
+				}
+				
+			};
+
+	return top.window._workspaceController;
+	
+});

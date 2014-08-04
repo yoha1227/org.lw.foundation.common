@@ -1,0 +1,78 @@
+define(
+		"affair_mngt/embedded_widgets/AffairEntryFilterPanel",
+		[ "dojo", "dijit", "dijit/_WidgetBase", 
+		  	"dijit/_TemplatedMixin",
+			"dijit/_WidgetsInTemplateMixin",
+			// import modules will be inherited by our widget:
+			"dojox3rd/widget_template/SelectableEditorForm",
+			"dojo/text!./templates/AffairEntryFilterPanel.html",
+			// import modules used by our widget:
+			"affairService/operateStateMetaoStub",
+			"dojox3rd/mvc/mvcUtils",
+			"dojo/store/Memory",
+			"dijit/registry",
+			"dojo/on",
+			"dojo/dom",
+			"dojo/dom-attr"
+		],
+		function(dojo, dijit, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, SelectableEditorForm, 
+				templateStr, operateStateMetaoStub, mvcUtils, Memory, registry, on, dom, domAttr ) {
+	    	
+			return dojo.declare("affair_mngt.embedded_widgets.AffairEntryFilterPanel",
+					[ _WidgetBase, _TemplatedMixin,
+							_WidgetsInTemplateMixin,
+							// the modules will be inherited by our widget:
+							dojox3rd.widget_template.SelectableEditorForm
+							], {
+						// Path to the template
+						templateString : templateStr,
+						
+						//define our attribute variables here:
+						operateStateSelector : null,
+						
+				        // Override this method to perform custom behavior during dijit construction.
+						// Common operations for constructor:
+						// 1) Initialize non-primitive types (i.e. objects and arrays)
+						// 2) Add additional properties needed by succeeding lifecycle methods
+						constructor : function() {
+							
+						},
+
+						// When this method is called, all variables inherited from superclasses are 'mixed in'.
+						// Common operations for postMixInProperties
+						// 1) Modify or assign values for widget property variables defined in the template HTML file
+						postMixInProperties : function() {
+							this.inherited(arguments);
+						},
+
+						// postCreate() is called after buildRendering().  This is useful to override when 
+						// you need to access and/or manipulate DOM nodes included with your widget.
+						// DOM nodes and widgets with the dojoAttachPoint attribute specified can now be directly
+						// accessed as fields on "this". 
+						// Common operations for postCreate
+						// 1) Access and manipulate DOM nodes created in buildRendering()
+						// 2) Add new DOM nodes or widgets 
+						postCreate : function() {
+							this.inherited(arguments);							
+							
+							// "this" pointer maybe changed to html not this widget after registry.byid called 
+							var _thisWidget = this;
+							
+							var selectorNode = mvcUtils.findFirstNodeWithAttrValueInTree("widgetid", "operateStateSelector", _thisWidget.domNode);
+							
+							_thisWidget.operateStateSelector = registry.byId(domAttr.get(selectorNode, "widgetid"));
+							
+							operateStateMetaoStub.findAllEntities().then(function(operateStates){
+								var operateStateStore = new Memory({data: operateStates, idProperty:'index'});
+								
+//								defOperateStateMetao.resolve(operateStateStore);						
+								_thisWidget.operateStateSelector.set({
+									store: operateStateStore,
+									searchAttr: "stateName"
+								});
+							});
+							
+						}
+						
+					});
+		});

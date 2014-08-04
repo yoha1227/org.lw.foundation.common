@@ -1,0 +1,11 @@
+.OperationHistoryGrid { 
+	 
+}
+
+.OperationHistoryGrid .otherOperateState{ 
+     color: #CECECE;
+}
+
+.OperationHistoryGrid .currentOperateState{ 
+     color: #000;
+}

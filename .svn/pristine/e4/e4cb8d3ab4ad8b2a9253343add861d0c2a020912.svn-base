@@ -1,0 +1,24 @@
+/*define(["until/doh/runner"], function(){
+	
+});
+*/
+
+require([
+		"affairService/partyMangerStub",
+		"dojo/json" ],
+	function(partyMangerStub, json) {
+			
+		partyMangerStub.findTopLevelEntities().then(function(response){
+			var topLevelEnities = response;
+
+			if (topLevelEnities.length > 0)
+				return partyMangerStub.findChildrenOfEntityById(topLevelEnities[0].id);
+			else
+				return;
+		}).then(function(children){		
+			for (var i in children) {
+				console.debug(children[i].nameAbbr);
+			}
+		});
+			
+	});

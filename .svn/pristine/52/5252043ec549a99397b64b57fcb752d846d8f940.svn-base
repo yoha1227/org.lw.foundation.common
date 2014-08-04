@@ -1,0 +1,52 @@
+/*define(["until/doh/runner"], function(){
+	
+});
+*/
+
+require([
+		"affairService/affairEntryDaoStub",
+		"affairService/affairEntryDetailDaoStub",
+		"dojo/json" ],
+	function(affairEntryService, affairEntryDetailService, json) {
+			
+		var id;
+		
+		affairEntryService.getDefaultEntity().then(function(response){
+			var affairEntry = response;
+			var affairEntryDetail = affairEntry.affairEntryDetail;
+			
+			affairEntryDetail.id = null; 
+			return affairEntryDetailService.newEntity(affairEntryDetail);
+		}).then(function(newAffairEntryDetail){		
+			id = newAffairEntryDetail.id;
+				
+			return affairEntryDetailService.getEntityById(id);
+		}).then(function(foundAffairEntryDetail){
+			foundAffairEntryDetail.description = "my test desc";
+					
+			return affairEntryDetailService.updateEntity(foundAffairEntryDetail);
+		}).then(function(updatedAffairEntryDetail){
+
+			return affairEntryDetailService.deleteEntityById(id);
+		}).then(function(){
+			
+			return affairEntryDetailService.findAllEntities();
+		}).then(function(affairEntryDetailList){
+			for (var item in affairEntryDetailList) {
+				var affairEntryDetail = affairEntryDetailList[item];
+				console.debug(affairEntryDetail);
+			};
+			
+			var targetQuery = { 
+					subject : "#1号事件" 
+				};
+			
+			return affairEntryDetailService.findEntitiesByQuery(targetQuery);
+		}).then(function(affairEntryDetailList){
+			for (var item in affairEntryDetailList) {
+				var affairEntryDetail = affairEntryDetailList[item];
+				console.debug(affairEntryDetail);
+			}
+		});
+			
+	});

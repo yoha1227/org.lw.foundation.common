@@ -1,0 +1,7 @@
+{
+    "identifier":"id",
+	"label":"nameAbbr",
+	"items":[
+	   {"id":"1","children":[{"id":"2","children":[],"nameAbbr":"测试子"}],"nameAbbr":"测试的"}
+    ]
+}

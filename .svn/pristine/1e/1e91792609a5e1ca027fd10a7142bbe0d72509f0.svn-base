@@ -1,0 +1,193 @@
+define([
+	"dojo/_base/declare",
+	"dojo/_base/lang",
+	"dojox/mvc/getPlainValue",
+	"dojox/mvc/getStateful",
+	"dojox/mvc/EditModelRefController"
+	], function(declare, lang, getPlainValue, getStateful, EditModelRefController){
+	// module:
+	//		dojox3rd/mvc/RedoableEditModelRefController
+	
+	return declare("dojox3rd.mvc.RedoableEditModelRefController", EditModelRefController, {
+		// summary:
+		//		A child class of dojox/mvc/ModelRefController.
+		
+		// holdModelUntilCommit: Boolean
+		//		True not to send the change in model back to sourceModel until commit() is called.
+		holdModelUntilCommit: true,
+		
+		set: function(/*String*/ name, /*Anything*/ value){
+
+			if(name == this._refHoldModelUntilCommit){
+				return;
+			}
+			this.inherited(arguments);
+		},
+		
+		// override the inherited functions:
+		commit: function(){
+			this.inherited(arguments);
+			
+		},
+
+		reset: function(){
+			this.inherited(arguments);						
+			
+			var _thisController = this;
+			this.get(_thisController._refEditModelProp).watch(function (name, oldValue, value) {
+				_thisController._watchCallback(name, oldValue, value, _thisController);
+			});
+			
+			_thisController.initModelStack();
+			
+		},
+		
+		startup: function(){
+			// summary:
+			//		Starts up data binding as this object starts up.
+			this.inherited(arguments);
+			
+			this._modelStack = new Array();
+
+			var _thisController = this;
+			this.get(_thisController._refEditModelProp).watch(function (name, oldValue, value) {
+				_thisController._watchCallback(name, oldValue, value, _thisController);
+			});
+			
+			_thisController.initModelStack();
+			
+		},
+		
+		// extension variables:
+		_modelStack: null,
+		// _modelStack is empty at beginning, _currentModelPtr can't refer to real item
+		_currentModelPtr: -1,
+		_isEditModelChanged: false,
+		_changeShouldIgnore: false,
+		
+		_callbackAtChange: null,
+		
+		_refHoldModelUntilCommit: "holdModelUntilCommit",
+		
+		// extension functions:
+		_isModelChanged: function(){
+			return this._isEditModelChanged;
+		},
+
+		_watchCallback: function(name, oldValue, value, _thisController){
+			if (!_thisController._changeShouldIgnore) {
+				_thisController._isEditModelChanged = true;
+				if (_thisController._callbackAtChange != null)
+					_thisController._callbackAtChange(name, oldValue, value);
+				
+			}
+		},
+		
+		_cleanStack: function(){
+			while (this._modelStack.length > 0){
+				this._modelStack.pop();
+			}
+			this._currentModelPtr = -1;
+			
+		},
+
+		setCallbackAtChange: function(callback) {
+			this._callbackAtChange = callback;
+		},
+		
+		isUndoable: function(){
+			if (this._currentModelPtr > 0)
+				return true;
+			if (this._isModelChanged())
+				return true;
+			return false;
+		
+		},
+
+		isRedoable: function(){
+			if (this._currentModelPtr < (this._modelStack.length - 1))
+				return true;
+			else
+				return false;
+			
+		},
+
+		isCommitable: function(){
+			// should refactor
+			if (this._currentModelPtr > 0)
+				return true;
+			if (this._isModelChanged())
+				return true;
+			return false;
+		
+		},
+
+		initModelStack: function(){
+			this._cleanStack();
+			var newModel = this.cloneModel(this.get(this._refEditModelProp));
+			this._modelStack.push(newModel);
+
+			// make sure the _currentModelPtr point to last item in array
+			this._currentModelPtr++;
+			
+			this._isEditModelChanged = false;
+		},
+
+		backupModel: function(){
+			// make sure the backup of changed data append to last position in array
+			while (this._currentModelPtr < (this._modelStack.length - 1)){
+				this._modelStack.pop();
+			}
+				
+			var newModel = this.cloneModel(this.get(this._refEditModelProp));
+			this._modelStack.push(newModel);
+
+			// make sure the _currentModelPtr point to last item in array
+			this._currentModelPtr++;
+				
+			this._isEditModelChanged = false;
+		},
+
+		undo: function(){
+			// summary:
+			//		Change the model back to its original state.
+			
+			if (this._isModelChanged()) {
+				
+				this.backupModel();
+			}
+			
+			if (this._currentModelPtr <= 0)
+				return;
+			
+			this._currentModelPtr--;
+			
+			this._changeShouldIgnore = true;
+			this.set(this._refEditModelProp, this.cloneModel(this._modelStack[this._currentModelPtr]));
+			var _thisController = this;
+			this.get(_thisController._refEditModelProp).watch(function (name, oldValue, value) {
+				_thisController._watchCallback(name, oldValue, value, _thisController);
+			});
+			_thisController._changeShouldIgnore = false;
+		},
+
+		redo: function(){
+			// summary:
+			//		Change the model to last state.
+
+			if (this._currentModelPtr >= (this._modelStack.length - 1))
+				return;
+			
+			this._currentModelPtr++;
+			
+			this._changeShouldIgnore = true;
+			this.set(this._refEditModelProp, this.cloneModel(this._modelStack[this._currentModelPtr]));
+			var _thisController = this;
+			this.get(_thisController._refEditModelProp).watch(function (name, oldValue, value) {
+				_thisController._watchCallback(name, oldValue, value, _thisController);
+			});
+			_thisController._changeShouldIgnore = false;
+		}
+
+	});
+});

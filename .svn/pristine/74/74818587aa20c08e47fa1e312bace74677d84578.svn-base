@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>main entry for affair test suite</title>
+    <!--
+    <script type="text/javascript" src="test/testAffairEntryServiceStub.js"></script>
+    -->
+    <script type="text/javascript">
+        var testModulesDataPath = "affairTest/testModules.json";
+        require([
+          "dojo/text!"+testModulesDataPath,
+          "dojo/json",
+          "dojo/query",
+          "dojo/_base/lang",
+          "dojo/dom-attr",
+          "dojo/domReady!"
+        ], function(testModulesData, json, $, lang, domAttr){
+             var dohConfig = {
+                "async": 1
+             };
+             testModulesData = json.parse(testModulesData);
+             
+             var i=0, item, list=[];
+             for( ; item=testModulesData[i]; i++){
+                list[i] = "<li>"
+                    +"<a href='javascript:void(0)' index="+i+">"
+                    +item.name
+                    +"</a>"
+                    +"</li>";
+             }
+             var listHtml = "<ul>"+ list.join("") + "</ul>"
+             
+             document.getElementById("testBox").innerHTML = listHtml;
+             
+             function objectToQuery(map){
+                var pairs = [];
+                for(var name in map){
+                    var value = map[name];
+                    var assign = name + "=";
+                    if(lang.isArray(value)){
+                        for(var i = 0, l = value.length; i < l; ++i){
+                            pairs.push(assign + value[i]);
+                        }
+                    }else{
+                        pairs.push(assign + value);
+                    }
+                }
+                return pairs.join("&");
+             }
+             
+             $("#testBox").on("a:click", function(e){
+                var item = testModulesData[ domAttr.get(e.target, "index") ];
+                
+                dohConfig.testModule = item.module;
+                console.log(dohConfig)
+                var href = require.toUrl("dojo") + "/../util/doh/runner.html?"+objectToQuery(dohConfig);
+                console.log(href)
+                
+                location.href = href;
+             })
+        });
+    </script>
+</head>
+
+<body>
+<div id="testBox">
+    
+</div>
+</body>
+</html>

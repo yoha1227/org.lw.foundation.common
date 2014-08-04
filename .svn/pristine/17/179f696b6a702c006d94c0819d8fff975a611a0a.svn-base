@@ -1,0 +1,9 @@
+{
+	"dojoExtPackages"	:	[
+	   {"name": "affair_mngt", "location": "./"},
+	   {"name": "affairService", "location": "common/service_stub"},
+	   {"name": "affairEntity", "location": "common/entity"},
+	   {"name": "affairDto", "location": "common/dto"},
+	   {"name": "affairTest", "location": "./test"}
+	]
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>操作历史获取最近操作测试UI</title>
+		<script type="text/javascript">
+			require(["dojo/store/Memory", "dojo/ready"], function(Memory, ready){
+              var data = [
+                  {
+                    "id": 3,
+                    "operateStep": 1,
+                    "operateTime": 1363703491000,
+                    "operator": {
+                      "name": "管理员",
+                      "id": 1,
+                      "password": "123456",
+                      "userRole": {
+                        "name": "管理员",
+                        "id": 1,
+                        "funcPrivilege": "Admin,"
+                      },
+                      "accountName": "admin",
+                      "departments": [
+                        {
+                          "name": "总经办",
+                          "id": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": 2,
+                    "operateStep": 2,
+                    "operateTime": 1363703551000,
+                    "operator": {
+                      "name": "管理员",
+                      "id": 1,
+                      "password": "123456",
+                      "userRole": {
+                        "name": "管理员",
+                        "id": 1,
+                        "funcPrivilege": "Admin,"
+                      },
+                      "accountName": "admin",
+                      "departments": [
+                        {
+                          "name": "总经办",
+                          "id": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": 1,
+                    "operateStep": 1,
+                    "operateTime": 1363703431000,
+                    "operator": {
+                      "name": "管理员",
+                      "id": 1,
+                      "password": "123456",
+                      "userRole": {
+                        "name": "管理员",
+                        "id": 1,
+                        "funcPrivilege": "Admin,"
+                      },
+                      "accountName": "admin",
+                      "departments": [
+                        {
+                          "name": "总经办",
+                          "id": 1
+                        }
+                      ]
+                    }
+                  }
+                ];
+              var store = new Memory({data: data, idProperty: "id"});
+			  //取得最近时间的操作历史
+			  var result = store.query({"operateStep": 1}, {sort: [{attribute:"operateTime", descending: true}], count: 1});
+			  
+//			  console.log(result)
+			  
+			  function convertToText(data){
+			  	  var html = [], item;
+			  	  for(var i in data){
+				  	  if (i == "total") continue;
+				  	  item = data[i];
+					  console.log( item)
+				  	  html.push( item.operateStep + "&nbsp;" + item.operateTime + "&nbsp;" + item.operator.name);
+				  }
+				  return html.join("<br />");
+			  }
+			  
+			  document.getElementById("result").innerHTML = convertToText(result);
+            });
+		</script>
+	</head>
+	<body>
+		<div id="result"></div>
+	</body>
+</html>
